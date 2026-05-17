@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     market_data_provider: str = 'mock'
     news_data_provider: str = 'mock'
     quote_poll_seconds: int = 60
+    news_poll_seconds: int = 300
+    alert_eval_seconds: int = 30
+    signal_eval_seconds: int = 3600
 
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
         env_file='.env', env_file_encoding='utf-8'
