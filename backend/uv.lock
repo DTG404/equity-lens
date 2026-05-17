@@ -402,9 +402,12 @@ dev = [
 [package.dev-dependencies]
 dev = [
     { name = "aiosqlite" },
+    { name = "httpx" },
+    { name = "mypy" },
     { name = "pip-audit" },
     { name = "psycopg2-binary" },
     { name = "pytest-asyncio" },
+    { name = "ruff" },
 ]
 
 [package.metadata]
@@ -428,9 +431,12 @@ provides-extras = ["dev"]
 [package.metadata.requires-dev]
 dev = [
     { name = "aiosqlite", specifier = ">=0.20" },
+    { name = "httpx", specifier = ">=0.28" },
+    { name = "mypy", specifier = ">=1.15" },
     { name = "pip-audit", specifier = ">=2.9" },
     { name = "psycopg2-binary", specifier = ">=2.9" },
     { name = "pytest-asyncio", specifier = ">=0.25" },
+    { name = "ruff", specifier = ">=0.9" },
 ]
 
 [[package]]

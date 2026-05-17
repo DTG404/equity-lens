@@ -63,4 +63,5 @@ jobs:
         with:
           python-version: '3.12'
       - run: uv sync --group dev
+      - run: uv run alembic upgrade head
       - run: uv run alembic check
