@@ -12,6 +12,7 @@ from app.domain.db_models import (
     AlertEvent,
     AlertRule,
     Analysis,
+    PriceHistory,
     PriceSnapshot,
     SignalOutcome,
     WatchlistEntry,
@@ -57,6 +58,29 @@ async def _do_poll(session: AsyncSession, provider: Any) -> int:
                 provider=quote.provider,
             )
             session.add(snapshot)
+
+            from datetime import date
+            today = date.today()
+            existing_bar = await session.execute(
+                select(PriceHistory)
+                .where(
+                    PriceHistory.symbol == symbol,
+                    PriceHistory.date == today,
+                )
+                .limit(1)
+            )
+            if existing_bar.scalar_one_or_none() is None:
+                price = quote.price
+                bar = PriceHistory(
+                    symbol=symbol,
+                    date=today,
+                    open_price=price,
+                    high_price=price,
+                    low_price=price,
+                    close_price=price,
+                    volume=0,
+                )
+                session.add(bar)
             count += 1
         except Exception as e:
             logger.warning('Failed to poll %s: %s', symbol, e)
