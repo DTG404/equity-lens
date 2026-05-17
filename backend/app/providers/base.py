@@ -14,6 +14,16 @@ class Quote(BaseModel):
     provider: str
 
 
+class CompanyInfo(BaseModel):
+    symbol: str
+    company_name: str = ''
+    sector: str = ''
+    industry: str = ''
+    description: str = ''
+
+
 @runtime_checkable
 class MarketDataProvider(Protocol):
     def get_quote(self, symbol: TickerSymbol) -> Quote: ...
+    def get_company_info(self, symbol: TickerSymbol) -> CompanyInfo: ...
+    def get_history(self, symbol: TickerSymbol, days: int = 90) -> list[dict]: ...

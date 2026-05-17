@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from app.domain.models import TickerSymbol
-from app.providers.base import Quote
+from app.providers.base import CompanyInfo, Quote
 
 
 class MockMarketDataProvider:
@@ -13,6 +13,15 @@ class MockMarketDataProvider:
     Returns deterministic quote and history data. Does not fetch from any external API.
     No trade execution capability.
     """
+
+    _company_info: dict[str, dict[str, str]] = {
+        'AAPL': {'company_name': 'Apple Inc.', 'sector': 'Technology', 'industry': 'Consumer Electronics', 'description': 'Designs, manufactures, and markets smartphones, personal computers, tablets, wearables.'},
+        'MSFT': {'company_name': 'Microsoft Corporation', 'sector': 'Technology', 'industry': 'Software—Infrastructure', 'description': 'Develops and licenses software, services, devices, and solutions.'},
+        'NVDA': {'company_name': 'NVIDIA Corporation', 'sector': 'Technology', 'industry': 'Semiconductors', 'description': 'Designs graphics processing units for gaming, professional visualization, and AI.'},
+        'GOOGL': {'company_name': 'Alphabet Inc.', 'sector': 'Communication Services', 'industry': 'Internet Content & Information', 'description': 'Provides online advertising services, search engine, cloud computing, and various products.'},
+        'AMZN': {'company_name': 'Amazon.com Inc.', 'sector': 'Consumer Cyclical', 'industry': 'Internet Retail', 'description': 'Engages in retail, e-commerce, cloud computing, and digital streaming.'},
+        'META': {'company_name': 'Meta Platforms Inc.', 'sector': 'Communication Services', 'industry': 'Social Media', 'description': 'Develops social media platforms and virtual reality products.'},
+    }
 
     def get_quote(self, symbol: TickerSymbol) -> Quote:
         if symbol.value == 'AAPL':
@@ -33,6 +42,16 @@ class MockMarketDataProvider:
             price=price,
             change_percent=change,
             provider='mock',
+        )
+
+    def get_company_info(self, symbol: TickerSymbol) -> CompanyInfo:
+        info = self._company_info.get(symbol.value.upper(), {})
+        return CompanyInfo(
+            symbol=symbol.value.upper(),
+            company_name=info.get('company_name', ''),
+            sector=info.get('sector', ''),
+            industry=info.get('industry', ''),
+            description=info.get('description', ''),
         )
 
     def get_history(self, symbol: TickerSymbol, days: int = 30) -> list[dict[str, Any]]:
