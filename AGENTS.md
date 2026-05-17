@@ -13,6 +13,14 @@ Local-first stock market research terminal.
 - Dependency audit: `cd frontend && npm audit --audit-level=high`
 - Secrets scan: `gitleaks detect --source . --no-git`
 
+## Database Migrations
+
+- Create migration: `cd backend && uv run alembic revision --autogenerate -m "description"`
+- Apply: `cd backend && uv run alembic upgrade head`
+- Rollback one step: `cd backend && uv run alembic downgrade -1`
+- Check for drift: `cd backend && uv run alembic check`
+- View history: `cd backend && uv run alembic history`
+
 ## Security Notes
 
 - Never commit provider API keys.
