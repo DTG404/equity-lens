@@ -18,6 +18,8 @@ dev = [
     "httpx>=0.28",
     "ruff>=0.9",
     "mypy>=1.15",
+    "pip-audit>=2.9",
+    "psycopg2-binary>=2.9",
 ]
 
 [tool.ruff]
@@ -39,4 +41,9 @@ ignore_missing_imports = true
 dev = [
     "aiosqlite>=0.20",
     "pytest-asyncio>=0.25",
+    "httpx>=0.28",
+    "ruff>=0.9",
+    "mypy>=1.15",
+    "pip-audit>=2.9",
+    "psycopg2-binary>=2.9",
 ]
