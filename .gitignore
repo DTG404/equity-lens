@@ -31,6 +31,9 @@ Thumbs.db
 pgdata/
 .psql_history
 
+# Design docs (implementation plans)
+docs/
+
 # Gitleaks config
 .gitleaks.toml
 
