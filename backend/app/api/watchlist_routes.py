@@ -8,8 +8,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_session
-from app.domain.db_models import PriceSnapshot, WatchlistEntry
+from app.domain.db_models import CompanyInfo, PriceSnapshot, WatchlistEntry
 from app.domain.models import TickerSymbol
+from app.providers import get_market_data_provider
 
 router = APIRouter(prefix='/watchlist', tags=['watchlist'])
 
@@ -62,6 +63,24 @@ async def add_to_watchlist(
 
     entry = WatchlistEntry(symbol=body.symbol, company_name=body.company_name)
     session.add(entry)
+
+    try:
+        ts = TickerSymbol(value=body.symbol)
+        provider = get_market_data_provider()
+        info = provider.get_company_info(ts)
+        db_info = CompanyInfo(
+            symbol=info.symbol,
+            company_name=info.company_name,
+            sector=info.sector,
+            industry=info.industry,
+            description=info.description,
+        )
+        await session.merge(db_info)
+        if not entry.company_name and info.company_name:
+            entry.company_name = info.company_name
+    except Exception:
+        pass  # Non-blocking enrichment
+
     await session.flush()
     return {'symbol': entry.symbol, 'company_name': entry.company_name}
 
