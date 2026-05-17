@@ -15,12 +15,42 @@ class MockMarketDataProvider:
     """
 
     _company_info: dict[str, dict[str, str]] = {
-        'AAPL': {'company_name': 'Apple Inc.', 'sector': 'Technology', 'industry': 'Consumer Electronics', 'description': 'Designs, manufactures, and markets smartphones, personal computers, tablets, wearables.'},
-        'MSFT': {'company_name': 'Microsoft Corporation', 'sector': 'Technology', 'industry': 'Software—Infrastructure', 'description': 'Develops and licenses software, services, devices, and solutions.'},
-        'NVDA': {'company_name': 'NVIDIA Corporation', 'sector': 'Technology', 'industry': 'Semiconductors', 'description': 'Designs graphics processing units for gaming, professional visualization, and AI.'},
-        'GOOGL': {'company_name': 'Alphabet Inc.', 'sector': 'Communication Services', 'industry': 'Internet Content & Information', 'description': 'Provides online advertising services, search engine, cloud computing, and various products.'},
-        'AMZN': {'company_name': 'Amazon.com Inc.', 'sector': 'Consumer Cyclical', 'industry': 'Internet Retail', 'description': 'Engages in retail, e-commerce, cloud computing, and digital streaming.'},
-        'META': {'company_name': 'Meta Platforms Inc.', 'sector': 'Communication Services', 'industry': 'Social Media', 'description': 'Develops social media platforms and virtual reality products.'},
+        'AAPL': {
+            'company_name': 'Apple Inc.',
+            'sector': 'Technology',
+            'industry': 'Consumer Electronics',
+            'description': 'Designs smartphones, personal computers, tablets, and wearables.',
+        },
+        'MSFT': {
+            'company_name': 'Microsoft Corporation',
+            'sector': 'Technology',
+            'industry': 'Software—Infrastructure',
+            'description': 'Develops software, services, devices, and cloud solutions.',
+        },
+        'NVDA': {
+            'company_name': 'NVIDIA Corporation',
+            'sector': 'Technology',
+            'industry': 'Semiconductors',
+            'description': 'Designs GPUs for gaming, professional viz, and AI.',
+        },
+        'GOOGL': {
+            'company_name': 'Alphabet Inc.',
+            'sector': 'Communication Services',
+            'industry': 'Internet Content & Information',
+            'description': 'Provides online advertising, search, cloud, and various products.',
+        },
+        'AMZN': {
+            'company_name': 'Amazon.com Inc.',
+            'sector': 'Consumer Cyclical',
+            'industry': 'Internet Retail',
+            'description': 'Engages in e-commerce, cloud computing, and digital streaming.',
+        },
+        'META': {
+            'company_name': 'Meta Platforms Inc.',
+            'sector': 'Communication Services',
+            'industry': 'Social Media',
+            'description': 'Develops social media platforms and VR products.',
+        },
     }
 
     def get_quote(self, symbol: TickerSymbol) -> Quote:

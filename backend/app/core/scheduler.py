@@ -1,12 +1,16 @@
 """Background scheduler for periodic quote polling."""
+import asyncio
 import logging
 from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Any
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.interval import IntervalTrigger
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.db import _async_session_factory, init_db
 from app.domain.db_models import (
     AlertEvent,
@@ -320,13 +324,7 @@ async def _do_evaluate_outcomes(session: AsyncSession) -> int:
 
 # ── APScheduler daemon ──────────────────────────────────────────────────────────
 
-import asyncio
-from contextlib import suppress
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.interval import IntervalTrigger
-
-from app.core.config import settings
 
 _scheduler: AsyncIOScheduler | None = None
 
@@ -390,7 +388,7 @@ def stop_scheduler() -> None:
     logger.info('APScheduler shut down')
 
 
-def _run_async_job(async_func: Callable) -> Callable:
+def _run_async_job(async_func: Callable[..., Any]) -> Callable[[], Any]:
     """Wrap an async function for APScheduler's sync job interface."""
     def wrapper() -> None:
         try:
@@ -400,7 +398,7 @@ def _run_async_job(async_func: Callable) -> Callable:
     return wrapper
 
 
-async def _safe_run(async_func: Callable) -> None:
+async def _safe_run(async_func: Callable[..., Any]) -> None:
     """Run an async scheduler function with error isolation."""
     try:
         result = await async_func()

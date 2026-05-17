@@ -12,10 +12,11 @@ from app.domain.db_models import Analysis, NewsArticle, PriceHistory, PriceSnaps
 from app.domain.models import TickerSymbol
 from app.domain.scoring import compute_factor_scores
 from app.providers import get_market_data_provider
+from app.providers.base import MarketDataProvider
 
 router = APIRouter(prefix='/research', tags=['research'])
 
-def _get_provider():
+def _get_provider() -> MarketDataProvider:
     return get_market_data_provider()
 
 

@@ -1,6 +1,5 @@
 """Tests for APScheduler daemon integration."""
 
-import pytest
 import pytest_asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytest import mark
