@@ -1,0 +1,42 @@
+[project]
+name = "equity-lens-api"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.14",
+    "apscheduler>=3.11.2",
+    "fastapi>=0.115",
+    "pydantic-settings>=2.7",
+    "sqlalchemy[asyncio]>=2.0",
+    "uvicorn[standard]>=0.34",
+    "yfinance>=1.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "httpx>=0.28",
+    "ruff>=0.9",
+    "mypy>=1.15",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+
+[dependency-groups]
+dev = [
+    "aiosqlite>=0.20",
+    "pytest-asyncio>=0.25",
+]

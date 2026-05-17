@@ -1,0 +1,31 @@
+{
+  "name": "equity-lens-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "npx tsc --noEmit",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "next": "^15",
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6",
+    "@testing-library/react": "^16",
+    "@types/node": "^20.19.41",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "jsdom": "^26",
+    "postcss": "^8.5.14",
+    "typescript": "^5",
+    "vitest": "^3"
+  },
+  "overrides": {
+    "postcss": "^8.5.14"
+  }
+}
