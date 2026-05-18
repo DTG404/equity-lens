@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     news_poll_seconds: int = 300
     alert_eval_seconds: int = 30
     signal_eval_seconds: int = 3600
+    fred_api_key: str = ''
 
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
         env_file='.env', env_file_encoding='utf-8'
