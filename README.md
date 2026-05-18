@@ -109,7 +109,7 @@ Equity Lens is a futuristic financial research terminal with a liquid glass UI, 
 ### One-time setup
 
 ```bash
-git clone https://github.com/digitalghost404/equity-lens.git
+git clone https://github.com/DTG404/equity-lens.git
 cd equity-lens
 cp .env.example .env
 ```
@@ -493,4 +493,4 @@ uv run alembic history                                    # View history
 
 ## License
 
-MIT © digitalghost404
+MIT © DTG404
