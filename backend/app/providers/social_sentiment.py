@@ -23,18 +23,18 @@ def get_sentiment(symbol: str) -> dict[str, Any]:
         recent: list[dict[str, Any]] = []
 
         for msg in messages[:20]:
-            sentiment = (msg.get('entities', {})
-                        .get('sentiment', {})
-                        .get('basic', 'Neutral'))
-            if sentiment == 'Bullish':
+            entities = msg.get('entities') or {}
+            sentiment = entities.get('sentiment') or {}
+            basic = sentiment.get('basic', 'Neutral')
+            if basic == 'Bullish':
                 bullish += 1
-            elif sentiment == 'Bearish':
+            elif basic == 'Bearish':
                 bearish += 1
             total += 1
 
             recent.append({
                 'body': msg.get('body', '')[:200],
-                'sentiment': sentiment,
+                'sentiment': basic,
                 'user': msg.get('user', {}).get('username', ''),
                 'created_at': msg.get('created_at', ''),
             })
