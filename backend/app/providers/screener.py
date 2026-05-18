@@ -1,6 +1,5 @@
 """Stock screener — filters a predefined universe by user criteria."""
 
-import asyncio
 from typing import Any
 
 import yfinance as yf

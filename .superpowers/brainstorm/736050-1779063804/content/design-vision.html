@@ -1,0 +1,152 @@
+<h2>🎨 Equity Lens — Design Refresh</h2>
+<p class="subtitle">Audit of current UI + proposed improvements. I'll show each section one at a time.</p>
+
+<div class="section">
+  <h3>Current Pain Points</h3>
+  <div class="pros-cons" style="margin-bottom: 1rem;">
+    <div class="cons">
+      <h4>Issues</h4>
+      <ul>
+        <li>No design system — every component styles itself</li>
+        <li>Hand-rolled SVG chart — no interactivity, no zoom, no tooltips</li>
+        <li>Flat table layouts — no visual hierarchy on the dashboard</li>
+        <li>No dark mode — financial apps are expected to support it</li>
+        <li>No navigation bar — hard to move between sections</li>
+        <li>Raw colors (green/red) without a cohesive palette</li>
+        <li>No loading states, no empty states, no error states</li>
+      </ul>
+    </div>
+    <div class="pros">
+      <h4>What Works</h4>
+      <ul>
+        <li>Functional layout covers all features</li>
+        <li>Factor score bars with color coding</li>
+        <li>Bull/Base/Bear scenario cards</li>
+        <li>Signal history table is clean</li>
+        <li>Alert severity colors are intuitive</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Proposed Stack</h3>
+  <div class="options" data-multiselect style="grid-template-columns: 1fr 1fr;">
+    <div class="option" data-choice="tailwind" onclick="toggleSelect(this)" style="cursor:default">
+      <div class="letter">1</div>
+      <div class="content">
+        <h3>Tailwind CSS v4</h3>
+        <p>Utility-first CSS framework. Ships with Next.js natively. Dark mode via <code>dark:</code> prefix. Consistent spacing, typography, and color system.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="lightweight" onclick="toggleSelect(this)" style="cursor:default">
+      <div class="letter">2</div>
+      <div class="content">
+        <h3>TradingView Lightweight Charts</h3>
+        <p>Industry-standard financial charting library. Interactive crosshair, volume bars, time range selector, MA overlays. Free and lightweight (42KB gzip).</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Design Direction</h3>
+  <p>Professional financial terminal aesthetic — dark background (#0d1117), clean cards with subtle borders, monospace for data, sans-serif for UI text. Inspired by Bloomberg Terminal and TradingView but simplified for retail investors.</p>
+  <div style="display:flex; gap: 1rem; flex-wrap:wrap; margin-top:1rem;">
+    <div style="background:#0d1117; color:#c9d1d9; padding:1.5rem; border-radius:8px; border:1px solid #30363d; flex:1; min-width:200px;">
+      <div style="font-size:0.7rem; text-transform:uppercase; color:#8b949e; margin-bottom:0.5rem;">Dark Theme</div>
+      <div style="display:flex; gap:0.25rem;">
+        <span style="background:#238636; width:20px; height:20px; border-radius:4px; display:inline-block;"></span>
+        <span style="background:#d29922; width:20px; height:20px; border-radius:4px; display:inline-block;"></span>
+        <span style="background:#da3633; width:20px; height:20px; border-radius:4px; display:inline-block;"></span>
+        <span style="background:#58a6ff; width:20px; height:20px; border-radius:4px; display:inline-block;"></span>
+      </div>
+      <div style="margin-top:0.5rem; font-family:monospace; font-size:0.8rem;">
+        <span style="color:#238636;">▲ +2.4%</span> AAPL<br>
+        <span style="color:#da3633;">▼ -1.2%</span> MSFT
+      </div>
+    </div>
+    <div style="background:#ffffff; color:#1f2328; padding:1.5rem; border-radius:8px; border:1px solid #d0d7de; flex:1; min-width:200px;">
+      <div style="font-size:0.7rem; text-transform:uppercase; color:#656d76; margin-bottom:0.5rem;">Light Theme</div>
+      <div style="display:flex; gap:0.25rem;">
+        <span style="background:#1f883d; width:20px; height:20px; border-radius:4px; display:inline-block;"></span>
+        <span style="background:#9a6700; width:20px; height:20px; border-radius:4px; display:inline-block;"></span>
+        <span style="background:#cf222e; width:20px; height:20px; border-radius:4px; display:inline-block;"></span>
+        <span style="background:#0969da; width:20px; height:20px; border-radius:4px; display:inline-block;"></span>
+      </div>
+      <div style="margin-top:0.5rem; font-family:monospace; font-size:0.8rem;">
+        <span style="color:#1f883d;">▲ +2.4%</span> AAPL<br>
+        <span style="color:#cf222e;">▼ -1.2%</span> MSFT
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Screen 1 of 3: Header & Navigation</h3>
+  <p class="subtitle">I'll show you a proposed nav bar. Let me know what you think before I move to page layouts.</p>
+</div>
+
+<div class="mockup" style="margin-top: 1rem;">
+  <div class="mockup-header">Navigation Bar — Proposed Design</div>
+  <div class="mockup-body" style="padding:0;">
+    <!-- Nav bar mockup -->
+    <div style="background:#0d1117; padding:0.75rem 1.5rem; border-bottom:1px solid #30363d; display:flex; align-items:center; gap:2rem; color:#c9d1d9; font-family:-apple-system,BlinkMacSystemFont,sans-serif;">
+      <div style="font-weight:700; font-size:1.1rem; color:#f0f6fc;">
+        <span style="color:#58a6ff;">Equity</span>Lens
+      </div>
+      <div style="display:flex; gap:1.5rem; font-size:0.875rem;">
+        <span style="color:#f0f6fc; font-weight:500; border-bottom:2px solid #58a6ff; padding-bottom:0.25rem;">Dashboard</span>
+        <span style="color:#8b949e;">Research</span>
+        <span style="color:#8b949e;">Screener</span>
+        <span style="color:#8b949e;">Portfolio</span>
+        <span style="color:#8b949e;">Signals</span>
+      </div>
+      <div style="margin-left:auto; display:flex; gap:0.75rem; align-items:center;">
+        <span style="background:#238636; padding:0.15rem 0.5rem; border-radius:999px; font-size:0.75rem; font-weight:600;">LIVE</span>
+        <span style="font-size:0.8rem; color:#8b949e;">AAPL $198.50</span>
+        <span style="font-size:0.8rem; color:#238636;">▲ 1.2%</span>
+      </div>
+    </div>
+    <!-- Content mock -->
+    <div style="background:#161b22; padding:1.5rem; min-height:150px; display:flex; gap:1rem;">
+      <div style="flex:1; background:#0d1117; border:1px solid #30363d; border-radius:8px; padding:1rem;">
+        <div style="font-size:0.7rem; text-transform:uppercase; color:#8b949e; margin-bottom:0.5rem;">Watchlist</div>
+        <div style="display:flex; justify-content:space-between; padding:0.25rem 0; font-family:monospace; font-size:0.8rem;">
+          <span style="color:#f0f6fc;">AAPL</span>
+          <span style="color:#f0f6fc;">$198.50</span>
+          <span style="color:#238636;">+1.2%</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:0.25rem 0; font-family:monospace; font-size:0.8rem;">
+          <span style="color:#f0f6fc;">MSFT</span>
+          <span style="color:#f0f6fc;">$425.30</span>
+          <span style="color:#da3633;">-0.5%</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:0.25rem 0; font-family:monospace; font-size:0.8rem;">
+          <span style="color:#f0f6fc;">NVDA</span>
+          <span style="color:#f0f6fc;">$875.60</span>
+          <span style="color:#238636;">+3.4%</span>
+        </div>
+      </div>
+      <div style="flex:2; background:#0d1117; border:1px solid #30363d; border-radius:8px; padding:1rem;">
+        <div style="font-size:0.7rem; text-transform:uppercase; color:#8b949e; margin-bottom:0.5rem;">Market Summary</div>
+        <div style="height:60px; display:flex; align-items:flex-end; gap:4px;">
+          <div style="flex:1; background:#238636; height:40%; border-radius:2px;"></div>
+          <div style="flex:1; background:#238636; height:55%; border-radius:2px;"></div>
+          <div style="flex:1; background:#238636; height:45%; border-radius:2px;"></div>
+          <div style="flex:1; background:#da3633; height:35%; border-radius:2px;"></div>
+          <div style="flex:1; background:#238636; height:60%; border-radius:2px;"></div>
+          <div style="flex:1; background:#238636; height:50%; border-radius:2px;"></div>
+          <div style="flex:1; background:#da3633; height:30%; border-radius:2px;"></div>
+          <div style="flex:1; background:#238636; height:65%; border-radius:2px;"></div>
+          <div style="flex:1; background:#238636; height:48%; border-radius:2px;"></div>
+          <div style="flex:1; background:#da3633; height:25%; border-radius:2px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <p>Open <code>http://localhost:55372</code> in your browser to see the full design vision. Next screens will drill into specific pages. What do you think of the direction?</p>
+</div>

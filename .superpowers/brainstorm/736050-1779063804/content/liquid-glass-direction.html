@@ -1,0 +1,246 @@
+<h2>🧊 Apple Liquid Glass — Design Direction</h2>
+<p class="subtitle">Translating Apple's design language to a financial terminal</p>
+
+<div class="section">
+  <h3>Core Principles (from Apple HIG)</h3>
+  <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:1rem; margin-top:0.75rem;">
+    <div style="border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:1rem; backdrop-filter:blur(10px); background:rgba(255,255,255,0.03);">
+      <div style="font-size:1.5rem; margin-bottom:0.25rem;">🔍</div>
+      <div style="font-weight:600; font-size:0.9rem;">Clarity</div>
+      <div style="font-size:0.75rem; color:rgba(255,255,255,0.5); margin-top:0.25rem;">Text must be legible over glass. Use high contrast, bold weight for data, never place critical text over busy backgrounds.</div>
+    </div>
+    <div style="border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:1rem; backdrop-filter:blur(10px); background:rgba(255,255,255,0.03);">
+      <div style="font-size:1.5rem; margin-bottom:0.25rem;">👁️</div>
+      <div style="font-weight:600; font-size:0.9rem;">Deference</div>
+      <div style="font-size:0.75rem; color:rgba(255,255,255,0.5); margin-top:0.25rem;">Content is king. Glass UI recedes — it's a functional layer that floats above data without competing for attention.</div>
+    </div>
+    <div style="border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:1rem; backdrop-filter:blur(10px); background:rgba(255,255,255,0.03);">
+      <div style="font-size:1.5rem; margin-bottom:0.25rem;">📐</div>
+      <div style="font-weight:600; font-size:0.9rem;">Depth</div>
+      <div style="font-size:0.75rem; color:rgba(255,255,255,0.5); margin-top:0.25rem;">Visual layers create hierarchy. Glass sits between the background (content) and the user, with controls on top.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Apple's Layering System</h3>
+  <div style="display:flex; flex-direction:column; gap:0.5rem; margin-top:0.75rem;">
+    <div style="display:flex; align-items:center; gap:1rem; padding:0.5rem 1rem; background:rgba(255,255,255,0.1); border-radius:8px;">
+      <span style="font-size:0.7rem; font-weight:600; color:rgba(255,255,255,0.4); width:60px;">Layer 3</span>
+      <span style="flex:1; font-size:0.8rem;">Interactive controls — buttons, sliders, inputs, toggles</span>
+      <span style="background:rgba(255,255,255,0.15); width:40px; height:8px; border-radius:4px;"></span>
+    </div>
+    <div style="display:flex; align-items:center; gap:1rem; padding:0.5rem 1rem; backdrop-filter:blur(12px); background:rgba(255,255,255,0.08); border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
+      <span style="font-size:0.7rem; font-weight:600; color:rgba(255,255,255,0.4); width:60px;">Layer 2</span>
+      <span style="flex:1; font-size:0.8rem;"><strong>Liquid Glass</strong> — navigation, sidebars, tab bars, cards, panels</span>
+      <span style="backdrop-filter:blur(12px); background:rgba(255,255,255,0.1); width:60px; height:12px; border-radius:6px; border:1px solid rgba(255,255,255,0.15);"></span>
+    </div>
+    <div style="display:flex; align-items:center; gap:1rem; padding:0.5rem 1rem; border-radius:8px;">
+      <span style="font-size:0.7rem; font-weight:600; color:rgba(255,255,255,0.4); width:60px;">Layer 1</span>
+      <span style="flex:1; font-size:0.8rem;">Content — charts, tables, data, background</span>
+      <span style="background:linear-gradient(135deg, #1a1a2e, #0d1117); width:80px; height:16px; border-radius:8px;"></span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Translating to Web — Tech Options</h3>
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-top:0.75rem;">
+    <div style="border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:1rem; backdrop-filter:blur(10px); background:rgba(255,255,255,0.03);">
+      <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:0.5rem;">
+        <span style="background:rgba(74,222,128,0.2); color:#4ade80; padding:0.15rem 0.5rem; border-radius:999px; font-size:0.65rem; font-weight:600;">RECOMMENDED</span>
+      </div>
+      <div style="font-weight:600;">Glin UI</div>
+      <div style="font-size:0.75rem; color:rgba(255,255,255,0.5); margin-top:0.25rem;">77 React components built on Radix + Tailwind. Glass, liquid, matte, glow surface variants. 5 elevation levels. MIT license. Same ergonomics as shadcn/ui. Ships tokens, motion, and dark mode.</div>
+      <div style="font-size:0.7rem; color:rgba(255,255,255,0.3); margin-top:0.5rem;">npm: @glinui/ui @glinui/tokens</div>
+    </div>
+    <div style="border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:1rem; backdrop-filter:blur(10px); background:rgba(255,255,255,0.03);">
+      <div style="font-weight:600;">Custom CSS (Tailwind)</div>
+      <div style="font-size:0.75rem; color:rgba(255,255,255,0.5); margin-top:0.25rem;">Use Tailwind's backdrop-blur utilities with custom color tokens. Full control, smaller bundle, no dependency. More work to build components from scratch but no vendor risk.</div>
+      <div style="font-size:0.7rem; color:rgba(255,255,255,0.3); margin-top:0.5rem;">backdrop-blur-xl bg-white/5 border-white/10</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Proposed Color Palette</h3>
+  <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:0.75rem;">
+    <div style="width:48px; height:48px; border-radius:12px; background:rgba(10,10,26,0.9); border:1px solid rgba(255,255,255,0.1);"></div>
+    <div style="width:48px; height:48px; border-radius:12px; background:rgba(255,255,255,0.05); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.1);"></div>
+    <div style="width:48px; height:48px; border-radius:12px; background:rgba(255,255,255,0.1); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.15);"></div>
+    <div style="width:48px; height:48px; border-radius:12px; background:rgba(255,255,255,0.15); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.2);"></div>
+    <div style="width:48px; height:48px; border-radius:12px; background:#4ade80; border:1px solid rgba(74,222,128,0.5);"></div>
+    <div style="width:48px; height:48px; border-radius:12px; background:#22d3ee; border:1px solid rgba(34,211,238,0.5);"></div>
+    <div style="width:48px; height:48px; border-radius:12px; background:#fbbf24; border:1px solid rgba(251,191,36,0.5);"></div>
+    <div style="width:48px; height:48px; border-radius:12px; background:#f87171; border:1px solid rgba(248,113,113,0.5);"></div>
+    <div style="width:48px; height:48px; border-radius:12px; background:#a78bfa; border:1px solid rgba(167,139,250,0.5);"></div>
+  </div>
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-top:1rem;">
+    <div>
+      <div style="font-weight:600; font-size:0.85rem;">Dark Theme Tokens</div>
+      <div style="font-family:monospace; font-size:0.7rem; color:rgba(255,255,255,0.5); margin-top:0.25rem;">
+        --bg-deep: #0a0a1a<br>
+        --bg-surface: rgba(255,255,255,0.03-0.08)<br>
+        --glass-blur: 12px<br>
+        --glass-border: rgba(255,255,255,0.1)<br>
+        --text-primary: #f0f6fc<br>
+        --text-secondary: rgba(255,255,255,0.6)<br>
+        --accent-green: #4ade80<br>
+        --accent-cyan: #22d3ee
+      </div>
+    </div>
+    <div>
+      <div style="font-weight:600; font-size:0.85rem;">Typography</div>
+      <div style="margin-top:0.25rem;">
+        <div style="font-family:'Inter', sans-serif; font-size:1rem; color:rgba(255,255,255,0.9);">Inter — UI text, navigation, labels</div>
+        <div style="font-family:'JetBrains Mono', monospace; font-size:0.9rem; color:#4ade80; margin-top:0.4rem;">JetBrains Mono — All financial data</div>
+        <div style="font-family:'Inter', sans-serif; font-size:0.75rem; color:rgba(255,255,255,0.3); margin-top:0.4rem;">System font stack as fallback</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Component Vision — Glass Financial Terminal</h3>
+  <div class="mockup" style="margin-top:0.5rem;">
+    <div class="mockup-body" style="padding:0; background:linear-gradient(135deg, #0a0a1a 0%, #0f0a2e 30%, #0a1a2e 60%, #0a0a1a 100%); min-height:400px;">
+      <!-- Floating nav bar -->
+      <div style="margin:0.75rem; backdrop-filter:blur(20px); background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:0.5rem 1.25rem; display:flex; align-items:center; gap:2rem;">
+        <div style="font-weight:700; font-size:1rem; background:linear-gradient(135deg, #4ade80, #22d3ee); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Equity Lens</div>
+        <div style="display:flex; gap:1.25rem; font-size:0.8rem; color:rgba(255,255,255,0.6);">
+          <span style="color:rgba(255,255,255,0.9);">Dashboard</span>
+          <span>Research</span>
+          <span>Screener</span>
+          <span>Portfolio</span>
+          <span>Signals</span>
+        </div>
+        <div style="margin-left:auto; display:flex; gap:0.75rem; align-items:center; font-size:0.75rem;">
+          <span style="backdrop-filter:blur(10px); background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.2); color:#4ade80; padding:0.2rem 0.6rem; border-radius:999px; font-size:0.65rem;">● LIVE</span>
+          <span style="color:rgba(255,255,255,0.6);">AAPL <span style="color:#f0f6fc;">$198.50</span></span>
+          <span style="color:#4ade80;">▲ 1.2%</span>
+        </div>
+      </div>
+
+      <!-- KPI cards row -->
+      <div style="display:flex; gap:0.75rem; margin:0.75rem; margin-top:0;">
+        <div style="flex:1; backdrop-filter:blur(16px); background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:1rem;">
+          <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.05em;">Portfolio</div>
+          <div style="font-family:'JetBrains Mono', monospace; font-size:1.5rem; color:#f0f6fc; margin-top:0.25rem;">$247.8k</div>
+          <div style="display:flex; gap:0.5rem; margin-top:0.25rem;">
+            <span style="color:#4ade80; font-family:monospace; font-size:0.75rem;">▲ +3.4%</span>
+          </div>
+        </div>
+        <div style="flex:1; backdrop-filter:blur(16px); background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:1rem;">
+          <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.05em;">Positions</div>
+          <div style="font-family:'JetBrains Mono', monospace; font-size:1.5rem; color:#f0f6fc; margin-top:0.25rem;">6</div>
+          <div style="color:rgba(255,255,255,0.3); font-size:0.75rem; margin-top:0.25rem;">3 profitable</div>
+        </div>
+        <div style="flex:1; backdrop-filter:blur(16px); background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:1rem;">
+          <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.05em;">Signal Acc.</div>
+          <div style="font-family:'JetBrains Mono', monospace; font-size:1.5rem; color:#f0f6fc; margin-top:0.25rem;">76.4%</div>
+          <div style="color:#22d3ee; font-family:monospace; font-size:0.75rem; margin-top:0.25rem;">↑ improving</div>
+        </div>
+        <div style="flex:1; backdrop-filter:blur(16px); background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:1rem;">
+          <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.05em;">Markets</div>
+          <div style="font-family:'JetBrains Mono', monospace; font-size:0.9rem; color:#f0f6fc; margin-top:0.25rem;">
+            <span style="color:#4ade80;">S&P 500 ▲</span>
+          </div>
+          <div style="font-family:monospace; font-size:0.75rem; color:#4ade80; margin-top:0.15rem;">+0.8%</div>
+        </div>
+      </div>
+
+      <!-- Watchlist table with glass -->
+      <div style="margin:0.75rem; margin-top:0;">
+        <div style="backdrop-filter:blur(16px); background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:16px; overflow:hidden;">
+          <div style="display:flex; padding:0.75rem 1rem; border-bottom:1px solid rgba(255,255,255,0.06); font-size:0.7rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.05em;">
+            <div style="flex:2;">Symbol</div>
+            <div style="flex:1; text-align:right;">Price</div>
+            <div style="flex:1; text-align:right;">Change</div>
+            <div style="flex:1; text-align:right;">Signal</div>
+          </div>
+          <div style="display:flex; padding:0.75rem 1rem; border-bottom:1px solid rgba(255,255,255,0.04); font-family:'JetBrains Mono', monospace;">
+            <div style="flex:2; color:#f0f6fc;">AAPL</div>
+            <div style="flex:1; text-align:right; color:#f0f6fc;">$198.50</div>
+            <div style="flex:1; text-align:right; color:#4ade80;">+1.2%</div>
+            <div style="flex:1; text-align:right;"><span style="backdrop-filter:blur(10px); background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.2); color:#4ade80; padding:0.15rem 0.5rem; border-radius:999px; font-size:0.65rem;">BULLISH</span></div>
+          </div>
+          <div style="display:flex; padding:0.75rem 1rem; border-bottom:1px solid rgba(255,255,255,0.04); font-family:'JetBrains Mono', monospace;">
+            <div style="flex:2; color:#f0f6fc;">MSFT</div>
+            <div style="flex:1; text-align:right; color:#f0f6fc;">$425.30</div>
+            <div style="flex:1; text-align:right; color:#f87171;">-0.5%</div>
+            <div style="flex:1; text-align:right;"><span style="backdrop-filter:blur(10px); background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.2); color:#fbbf24; padding:0.15rem 0.5rem; border-radius:999px; font-size:0.65rem;">NEUTRAL</span></div>
+          </div>
+          <div style="display:flex; padding:0.75rem 1rem; font-family:'JetBrains Mono', monospace;">
+            <div style="flex:2; color:#f0f6fc;">NVDA</div>
+            <div style="flex:1; text-align:right; color:#f0f6fc;">$875.60</div>
+            <div style="flex:1; text-align:right; color:#4ade80;">+3.4%</div>
+            <div style="flex:1; text-align:right;"><span style="backdrop-filter:blur(10px); background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.2); color:#4ade80; padding:0.15rem 0.5rem; border-radius:999px; font-size:0.65rem;">BULLISH</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Glass floating chat -->
+      <div style="position:relative; margin:0.75rem; margin-top:0;">
+        <div style="backdrop-filter:blur(20px); background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:1rem; display:flex; gap:0.75rem;">
+          <div style="flex:1;">
+            <div style="color:#4ade80; font-family:monospace; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.05em;">Factor Scores</div>
+            <div style="margin-top:0.5rem;">
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:rgba(255,255,255,0.6);"><span>Technical</span><span style="color:#4ade80;">78%</span></div>
+              <div style="height:4px; background:rgba(255,255,255,0.06); border-radius:2px; margin:0.25rem 0;"><div style="height:100%; width:78%; background:linear-gradient(90deg,#4ade80,#22d3ee); border-radius:2px;"></div></div>
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:rgba(255,255,255,0.6); margin-top:0.5rem;"><span>Sentiment</span><span style="color:#fbbf24;">62%</span></div>
+              <div style="height:4px; background:rgba(255,255,255,0.06); border-radius:2px; margin:0.25rem 0;"><div style="height:100%; width:62%; background:linear-gradient(90deg,#fbbf24,#f59e0b); border-radius:2px;"></div></div>
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:rgba(255,255,255,0.6); margin-top:0.5rem;"><span>Fundamentals</span><span style="color:#22d3ee;">55%</span></div>
+              <div style="height:4px; background:rgba(255,255,255,0.06); border-radius:2px; margin:0.25rem 0;"><div style="height:100%; width:55%; background:linear-gradient(90deg,#22d3ee,#818cf8); border-radius:2px;"></div></div>
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:rgba(255,255,255,0.6); margin-top:0.5rem;"><span>Macro</span><span style="color:rgba(255,255,255,0.3);">43%</span></div>
+              <div style="height:4px; background:rgba(255,255,255,0.06); border-radius:2px; margin:0.25rem 0;"><div style="height:100%; width:43%; background:rgba(255,255,255,0.2); border-radius:2px;"></div></div>
+            </div>
+          </div>
+          <div style="flex:1; border-left:1px solid rgba(255,255,255,0.06); padding-left:0.75rem;">
+            <div style="color:#22d3ee; font-family:monospace; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.05em;">AI Insights</div>
+            <div style="font-size:0.75rem; color:rgba(255,255,255,0.5); margin-top:0.5rem; line-height:1.5;">
+              "Apple's services revenue grew 14% YoY. Strong ecosystem lock-in supports premium valuation. Watch for China revenue in next earnings report."
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid rgba(255,255,255,0.1);">
+  <h3>Implementation Approach</h3>
+  <p class="subtitle">My recommendation: Glin UI for rapid component coverage + custom CSS for the unique bits</p>
+  <div style="display:flex; gap:1rem; margin-top:0.75rem;">
+    <div style="flex:1; border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:1rem; background:rgba(74,222,128,0.05); border-color:rgba(74,222,128,0.2);">
+      <div style="font-weight:600; color:#4ade80;">✅ Recommended: Glin UI</div>
+      <div style="font-size:0.75rem; color:rgba(255,255,255,0.5); margin-top:0.5rem;">
+        • 77 components with glass/liquid/matte/glow variants<br>
+        • Built on Radix UI (accessible by default)<br>
+        • Tailwind CSS v4 — fits our stack perfectly<br>
+        • 5 elevation levels for depth hierarchy<br>
+        • MIT licensed, open source<br>
+        • Dark mode built in<br>
+        • ~same ergonomics as shadcn/ui (CLI install)
+      </div>
+    </div>
+    <div style="flex:1; border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:1rem; background:rgba(255,255,255,0.03);">
+      <div style="font-weight:600;">Alternative: Custom CSS</div>
+      <div style="font-size:0.75rem; color:rgba(255,255,255,0.5); margin-top:0.5rem;">
+        • Zero dependencies<br>
+        • Full control over every pixel<br>
+        • Use Tailwind's backdrop-blur utilities<br>
+        • More work — every component hand-built<br>
+        • No pre-built Radix accessibility
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:0.75rem;">
+    <p style="color:rgba(255,255,255,0.6); font-size:0.8rem;">
+      <strong>Phase plan:</strong> 1) Install Glin UI + tokens → 2) Set up theme (colors, glass tokens, fonts) → 3) Build nav shell with floating glass nav bar → 4) Restyle dashboard components → 5) Install TradingView Lightweight Charts → 6) Restyle research page → 7) Polish
+    </p>
+  </div>
+</div>
+
+<div class="section" style="margin-top:1rem;">
+  <p style="color:rgba(255,255,255,0.6);">Open <code>http://localhost:55372</code> to view. What do you think of the Liquid Glass direction? Glin UI vs custom CSS?</p>
+</div>

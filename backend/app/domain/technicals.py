@@ -4,10 +4,10 @@ from typing import Any
 
 import pandas as pd
 import pandas_ta as ta
+from sqlalchemy import select
 
 from app.core import db as core_db
 from app.domain.db_models import PriceHistory
-from sqlalchemy import select
 
 
 async def compute_technicals(symbol: str) -> dict[str, Any]:
