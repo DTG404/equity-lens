@@ -10,8 +10,8 @@ from apscheduler.triggers.interval import IntervalTrigger
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import db as core_db
 from app.core.config import settings
-from app.core.db import _async_session_factory, init_db
 from app.domain.db_models import (
     AlertEvent,
     AlertRule,
@@ -39,10 +39,10 @@ async def poll_watchlist_quotes(
         session = get_session()
         return await _do_poll(session, prov)
 
-    if _async_session_factory is None:
-        await init_db()
-    assert _async_session_factory is not None
-    async with _async_session_factory() as session:
+    if core_db._async_session_factory is None:
+        await core_db.init_db()
+    assert core_db._async_session_factory is not None
+    async with core_db._async_session_factory() as session:
         return await _do_poll(session, prov)
 
 
@@ -104,10 +104,10 @@ async def evaluate_alerts(
         session = get_session()
         return await _do_evaluate(session)
 
-    if _async_session_factory is None:
-        await init_db()
-    assert _async_session_factory is not None
-    async with _async_session_factory() as session:
+    if core_db._async_session_factory is None:
+        await core_db.init_db()
+    assert core_db._async_session_factory is not None
+    async with core_db._async_session_factory() as session:
         return await _do_evaluate(session)
 
 
@@ -181,10 +181,10 @@ async def poll_watchlist_news(
         session = get_session()
         return await _do_poll_news(session, provider)
 
-    if _async_session_factory is None:
-        await init_db()
-    assert _async_session_factory is not None
-    async with _async_session_factory() as session:
+    if core_db._async_session_factory is None:
+        await core_db.init_db()
+    assert core_db._async_session_factory is not None
+    async with core_db._async_session_factory() as session:
         return await _do_poll_news(session, provider)
 
 
@@ -237,10 +237,10 @@ async def evaluate_signal_outcomes(
         session = get_session()
         return await _do_evaluate_outcomes(session)
 
-    if _async_session_factory is None:
-        await init_db()
-    assert _async_session_factory is not None
-    async with _async_session_factory() as session:
+    if core_db._async_session_factory is None:
+        await core_db.init_db()
+    assert core_db._async_session_factory is not None
+    async with core_db._async_session_factory() as session:
         return await _do_evaluate_outcomes(session)
 
 
