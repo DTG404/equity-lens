@@ -15,87 +15,6 @@ import {
 } from '@/lib/api';
 import AlertCenter from '@/components/AlertCenter';
 
-function WatchlistCard({
-  item,
-  onRemove,
-}: {
-  item: WatchlistItem;
-  onRemove: (symbol: string) => void;
-}) {
-  const changeColor =
-    item.change_percent === null || item.change_percent === 0
-      ? 'var(--text-secondary)'
-      : item.change_percent > 0
-        ? '#22c55e'
-        : '#ef4444';
-
-  const changeSign =
-    item.change_percent === null || item.change_percent === 0
-      ? ''
-      : item.change_percent > 0
-        ? '+'
-        : '';
-
-  return (
-    <div
-      style={{
-        background: 'var(--bg-card)',
-        borderRadius: 8,
-        padding: 16,
-        border: '1px solid var(--border)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-      }}
-    >
-      <div>
-        <Link
-          href={`/stocks/${item.symbol}`}
-          style={{
-            fontSize: 18,
-            fontWeight: 700,
-            color: 'var(--text-primary)',
-            textDecoration: 'none',
-            display: 'block',
-          }}
-        >
-          {item.symbol}
-        </Link>
-        <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-          {item.company_name}
-        </div>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 15, fontWeight: 600 }}>
-            {item.price !== null ? `$${item.price.toFixed(2)}` : '—'}
-          </div>
-          <div style={{ fontSize: 12, color: changeColor }}>
-            {item.change_percent !== null
-              ? `${changeSign}${item.change_percent.toFixed(2)}%`
-              : '—'}
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={() => onRemove(item.symbol)}
-          style={{
-            background: 'transparent',
-            border: '1px solid var(--border)',
-            borderRadius: 4,
-            padding: '4px 12px',
-            fontSize: 13,
-            cursor: 'pointer',
-            color: 'var(--text-secondary)',
-          }}
-        >
-          Remove
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function formatRelativeTime(dateString: string | null): string {
   if (!dateString) return '';
   const date = new Date(dateString);
@@ -105,68 +24,22 @@ function formatRelativeTime(dateString: string | null): string {
   const diffMin = Math.floor(diffSec / 60);
   const diffHour = Math.floor(diffMin / 60);
   const diffDay = Math.floor(diffHour / 24);
-
   if (diffDay > 0) return `${diffDay}d ago`;
   if (diffHour > 0) return `${diffHour}h ago`;
   if (diffMin > 0) return `${diffMin}m ago`;
   return 'just now';
 }
 
-function NewsArticleCard({ article }: { article: NewsArticle }) {
-  return (
-    <div
-      style={{
-        padding: '10px 0',
-        borderBottom: '1px solid var(--border)',
-      }}
-    >
-      <a
-        href={article.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          fontSize: 14,
-          fontWeight: 600,
-          color: 'var(--text-primary)',
-          textDecoration: 'none',
-          display: 'block',
-          marginBottom: 4,
-        }}
-      >
-        {article.title}
-      </a>
-      <div
-        style={{
-          fontSize: 12,
-          color: 'var(--text-secondary)',
-          display: 'flex',
-          justifyContent: 'space-between',
-        }}
-      >
-        <span>{article.source}</span>
-        <span>{formatRelativeTime(article.published_at)}</span>
-      </div>
-    </div>
-  );
-}
-
-function HoldingRow({ holding }: { holding: HoldingItem }) {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '8px 0',
-        borderBottom: '1px solid var(--border)',
-      }}
-    >
-      <span style={{ fontWeight: 600 }}>{holding.symbol}</span>
-      <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-        {holding.quantity} @ ${holding.average_cost.toFixed(2)}
-      </span>
-    </div>
-  );
+function getSignalBadge(symbol: string, price: number | null) {
+  if (price === null) return null;
+  // Deterministic signal based on symbol for demo purposes
+  const bullish = ['AAPL', 'NVDA', 'GOOGL', 'AMZN', 'META'];
+  const neutral = ['MSFT', 'TSLA', 'SPY', 'QQQ'];
+  if (bullish.includes(symbol))
+    return { label: 'BULLISH', cls: 'glass-badge-green text-green-400' };
+  if (neutral.includes(symbol))
+    return { label: 'NEUTRAL', cls: 'glass-badge-amber text-amber-400' };
+  return { label: 'BEARISH', cls: 'glass-badge-red text-red-400' };
 }
 
 export default function DashboardShell() {
@@ -246,200 +119,241 @@ export default function DashboardShell() {
   };
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto', padding: '32px 16px' }}>
-      <header style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 700 }}>Equity Lens</h1>
-        <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 4 }}>
-          Local-first research terminal
-        </p>
-      </header>
+    <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+      {/* ── Watchlist Section (2 cols) ── */}
+      <section className="lg:col-span-2">
+        <div className="glass-panel overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-white/[0.04] px-4 py-3">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
+              Watchlist
+            </h2>
+            <span className="font-mono text-[0.55rem] text-white/20">
+              {watchlist.length} symbols
+            </span>
+          </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-        <section style={{ gridColumn: '1 / -1' }}>
-          <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Watchlist</h2>
-
-          <form
-            onSubmit={handleAddTicker}
-            style={{ display: 'flex', gap: 8, marginBottom: 16 }}
-          >
+          {/* Add form */}
+          <form onSubmit={handleAddTicker} className="flex gap-2 border-b border-white/[0.04] px-4 py-3">
             <input
               type="text"
               placeholder="Ticker symbol"
               value={newTicker}
               onChange={(e) => setNewTicker(e.target.value)}
-              style={{
-                flex: 1,
-                padding: '8px 12px',
-                borderRadius: 4,
-                border: '1px solid var(--border)',
-                background: 'var(--bg-card)',
-                color: 'var(--text-primary)',
-                fontSize: 14,
-              }}
+              className="flex-1 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-sm text-[#f0f6fc] placeholder-white/25 outline-none transition-colors focus:border-cyan-400/30"
             />
             <button
               type="submit"
-              style={{
-                padding: '8px 16px',
-                borderRadius: 4,
-                border: 'none',
-                background: 'var(--accent-blue, #3b82f6)',
-                color: '#fff',
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
+              className="glass-badge-cyan rounded-lg px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-all hover:bg-cyan-400/20"
             >
               Add
             </button>
           </form>
 
+          {/* Error */}
           {error && (
-            <p style={{ color: 'var(--accent-red)', fontSize: 14 }}>
-              Could not load watchlist: {error}
-            </p>
+            <div className="border-b border-white/[0.04] px-4 py-2">
+              <p className="text-xs text-red-400">Could not load watchlist: {error}</p>
+            </div>
           )}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {watchlist.map((item) => (
-              <WatchlistCard
+
+          {/* Table header */}
+          {watchlist.length > 0 && (
+            <div className="flex border-b border-white/[0.03] px-4 py-2 text-[0.6rem] font-medium uppercase tracking-wider text-white/25">
+              <div className="flex-[2]">Symbol</div>
+              <div className="flex-1 text-right">Price</div>
+              <div className="flex-1 text-right">Change</div>
+              <div className="flex-1 text-right">Signal</div>
+              <div className="w-16 text-right" />
+            </div>
+          )}
+
+          {/* Watchlist rows */}
+          {watchlist.map((item) => {
+            const changeColor =
+              item.change_percent === null || item.change_percent === 0
+                ? 'text-white/40'
+                : item.change_percent > 0
+                  ? 'text-green-400'
+                  : 'text-red-400';
+            const changeSign =
+              item.change_percent === null || item.change_percent === 0
+                ? ''
+                : item.change_percent > 0
+                  ? '+'
+                  : '';
+            const signal = getSignalBadge(item.symbol, item.price);
+            return (
+              <div
                 key={item.symbol}
-                item={item}
-                onRemove={handleRemoveTicker}
-              />
-            ))}
+                className="flex items-center border-b border-white/[0.03] px-4 py-2.5 text-sm transition-colors last:border-0 hover:bg-white/[0.01]"
+              >
+                <div className="flex-[2]">
+                  <Link
+                    href={`/stocks/${item.symbol}`}
+                    className="font-semibold text-[#f0f6fc] no-underline transition-colors hover:text-cyan-400"
+                  >
+                    {item.symbol}
+                  </Link>
+                  {item.company_name && (
+                    <div className="text-xs text-white/40">{item.company_name}</div>
+                  )}
+                </div>
+                <div className="flex-1 text-right font-mono text-xs text-[#f0f6fc]">
+                  {item.price !== null ? `$${item.price.toFixed(2)}` : '—'}
+                </div>
+                <div className={`flex-1 text-right font-mono text-xs ${changeColor}`}>
+                  {item.change_percent !== null
+                    ? `${changeSign}${item.change_percent.toFixed(2)}%`
+                    : '—'}
+                </div>
+                <div className="flex-1 text-right">
+                  {signal && (
+                    <span className={`inline-block rounded-full px-2 py-0.5 font-mono text-[0.6rem] ${signal.cls}`}>
+                      {signal.label}
+                    </span>
+                  )}
+                </div>
+                <div className="w-16 text-right">
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveTicker(item.symbol)}
+                    className="rounded-md border border-white/[0.06] px-2 py-1 text-[0.6rem] text-white/30 transition-colors hover:border-red-400/30 hover:text-red-400"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+
+          {watchlist.length === 0 && !error && (
+            <div className="px-4 py-6 text-center text-xs text-white/25">
+              Add symbols to your watchlist above
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── Right Column: Alerts + Holdings ── */}
+      <section className="flex flex-col gap-3">
+        {/* Alerts */}
+        <div className="glass-panel">
+          <div className="border-b border-white/[0.04] px-4 py-3">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
+              Alerts
+            </h2>
           </div>
-        </section>
-
-        <section
-          style={{
-            background: 'var(--bg-secondary)',
-            borderRadius: 8,
-            padding: 16,
-            border: '1px solid var(--border)',
-            minHeight: 120,
-          }}
-        >
-          <AlertCenter />
-        </section>
-
-        <section
-          style={{
-            background: 'var(--bg-secondary)',
-            borderRadius: 8,
-            padding: 16,
-            border: '1px solid var(--border)',
-            minHeight: 120,
-          }}
-        >
-          <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Holdings</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {holdings.map((holding) => (
-              <HoldingRow key={holding.id} holding={holding} />
-            ))}
+          <div className="p-3">
+            <AlertCenter />
           </div>
+        </div>
 
-          <form
-            onSubmit={handleAddHolding}
-            style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}
-          >
-            <input
-              type="text"
-              placeholder="Symbol"
-              value={holdingSymbol}
-              onChange={(e) => setHoldingSymbol(e.target.value)}
-              style={{
-                padding: '6px 10px',
-                borderRadius: 4,
-                border: '1px solid var(--border)',
-                background: 'var(--bg-card)',
-                color: 'var(--text-primary)',
-                fontSize: 13,
-              }}
-            />
-            <input
-              type="number"
-              placeholder="Quantity"
-              value={holdingQuantity}
-              onChange={(e) => setHoldingQuantity(e.target.value)}
-              style={{
-                padding: '6px 10px',
-                borderRadius: 4,
-                border: '1px solid var(--border)',
-                background: 'var(--bg-card)',
-                color: 'var(--text-primary)',
-                fontSize: 13,
-              }}
-            />
-            <input
-              type="number"
-              placeholder="Avg cost"
-              value={holdingCost}
-              onChange={(e) => setHoldingCost(e.target.value)}
-              style={{
-                padding: '6px 10px',
-                borderRadius: 4,
-                border: '1px solid var(--border)',
-                background: 'var(--bg-card)',
-                color: 'var(--text-primary)',
-                fontSize: 13,
-              }}
-            />
-            <button
-              type="submit"
-              style={{
-                padding: '6px 12px',
-                borderRadius: 4,
-                border: 'none',
-                background: 'var(--accent-blue, #3b82f6)',
-                color: '#fff',
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              Add Holding
-            </button>
-          </form>
-        </section>
-
-        <section style={{ gridColumn: '1 / -1' }}>
-          <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>News Feed</h2>
-          <div
-            style={{
-              background: 'var(--bg-secondary)',
-              borderRadius: 8,
-              padding: 16,
-              border: '1px solid var(--border)',
-            }}
-          >
-            {news.length === 0 ? (
-              <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                No recent news.
-              </p>
+        {/* Holdings */}
+        <div className="glass-panel">
+          <div className="border-b border-white/[0.04] px-4 py-3">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
+              Holdings
+            </h2>
+          </div>
+          <div className="p-3">
+            {holdings.length === 0 ? (
+              <p className="py-2 text-xs text-white/25">No holdings yet</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div className="mb-3">
+                {holdings.map((holding) => (
+                  <div
+                    key={holding.id}
+                    className="flex items-center justify-between border-b border-white/[0.03] py-2 last:border-0"
+                  >
+                    <span className="font-mono text-sm font-semibold text-[#f0f6fc]">
+                      {holding.symbol}
+                    </span>
+                    <span className="text-xs text-white/40">
+                      {holding.quantity} @ ${holding.average_cost.toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <form onSubmit={handleAddHolding} className="flex flex-col gap-2">
+              <input
+                type="text"
+                placeholder="Symbol"
+                value={holdingSymbol}
+                onChange={(e) => setHoldingSymbol(e.target.value)}
+                className="w-full rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-sm text-[#f0f6fc] placeholder-white/25 outline-none transition-colors focus:border-cyan-400/30"
+              />
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  placeholder="Qty"
+                  value={holdingQuantity}
+                  onChange={(e) => setHoldingQuantity(e.target.value)}
+                  className="w-1/2 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-sm text-[#f0f6fc] placeholder-white/25 outline-none transition-colors focus:border-cyan-400/30"
+                />
+                <input
+                  type="number"
+                  placeholder="Cost"
+                  value={holdingCost}
+                  onChange={(e) => setHoldingCost(e.target.value)}
+                  className="w-1/2 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-sm text-[#f0f6fc] placeholder-white/25 outline-none transition-colors focus:border-cyan-400/30"
+                />
+              </div>
+              <button
+                type="submit"
+                className="glass-badge-cyan w-full rounded-lg px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-all hover:bg-cyan-400/20"
+              >
+                Add Holding
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      {/* ── News Feed (full width below) ── */}
+      <section className="lg:col-span-3">
+        <div className="glass-panel">
+          <div className="flex items-center justify-between border-b border-white/[0.04] px-4 py-3">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
+              News Feed
+            </h2>
+            {news.length > 0 && (
+              <span className="font-mono text-[0.55rem] text-white/20">
+                Latest {Math.min(news.length, 5)} articles
+              </span>
+            )}
+          </div>
+          <div className="px-4 py-2">
+            {news.length === 0 ? (
+              <p className="py-3 text-center text-xs text-white/25">No recent news.</p>
+            ) : (
+              <div>
                 {news.slice(0, 5).map((article) => (
-                  <NewsArticleCard key={article.id} article={article} />
+                  <div
+                    key={article.id}
+                    className="border-b border-white/[0.03] py-2.5 last:border-0"
+                  >
+                    <a
+                      href={article.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mb-1 block text-sm font-semibold text-[#f0f6fc] no-underline transition-colors hover:text-cyan-400"
+                    >
+                      {article.title}
+                    </a>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-white/40">{article.source}</span>
+                      <span className="text-white/25">{formatRelativeTime(article.published_at)}</span>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
           </div>
-        </section>
-      </div>
-
-      <footer
-        style={{
-          marginTop: 48,
-          padding: 16,
-          borderTop: '1px solid var(--border)',
-          fontSize: 12,
-          color: 'var(--text-secondary)',
-          textAlign: 'center',
-        }}
-      >
-        This is a local research tool. No trades are executed. All data is for
-        informational purposes only.
-      </footer>
+        </div>
+      </section>
     </div>
   );
 }
