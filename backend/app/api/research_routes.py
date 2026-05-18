@@ -1,7 +1,7 @@
 """Research aggregate endpoint for single-stock analysis page."""
 import json
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, cast
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_session
 from app.core.deepseek import AnalysisInput, generate_thesis_async
-from app.domain.db_models import Analysis, NewsArticle, PriceHistory, PriceSnapshot, WatchlistEntry
+from app.domain import db_models as models
 from app.domain.models import TickerSymbol
 from app.domain.scoring import compute_factor_scores
 from app.providers import get_market_data_provider
@@ -29,7 +29,7 @@ async def get_research(
 ) -> dict[str, Any]:
     sym = symbol.upper()
     result = await session.execute(
-        select(WatchlistEntry).where(WatchlistEntry.symbol == sym)
+        select(models.WatchlistEntry).where(models.WatchlistEntry.symbol == sym)
     )
     if result.scalar_one_or_none() is None:
         raise HTTPException(status_code=404, detail=f'{sym} not in watchlist')
@@ -38,9 +38,9 @@ async def get_research(
 
     # 1. Quote from DB or live
     snapshot = await session.execute(
-        select(PriceSnapshot)
-        .where(PriceSnapshot.symbol == sym)
-        .order_by(PriceSnapshot.recorded_at.desc())
+        select(models.PriceSnapshot)
+        .where(models.PriceSnapshot.symbol == sym)
+        .order_by(models.PriceSnapshot.recorded_at.desc())
         .limit(1)
     )
     row = snapshot.scalar_one_or_none()
@@ -58,9 +58,9 @@ async def get_research(
 
     # 2. Price history from DB
     history_result = await session.execute(
-        select(PriceHistory)
-        .where(PriceHistory.symbol == sym)
-        .order_by(PriceHistory.date.desc())
+        select(models.PriceHistory)
+        .where(models.PriceHistory.symbol == sym)
+        .order_by(models.PriceHistory.date.desc())
         .limit(90)
     )
     price_history = [
@@ -72,21 +72,47 @@ async def get_research(
         for h in reversed(list(history_result.scalars().all()))
     ]
 
-    # If no history in DB, fetch live
-    if not price_history:
-        live_history = _get_provider().get_history(ts, days=30)
-        price_history = [
-            {'date': e['date'], 'close': e['close'],
-             'open': e['open'], 'high': e['high'],
-             'low': e['low'], 'volume': e['volume']}
-            for e in live_history
-        ]
+    # If too few history points in DB, fetch live and persist
+    if len(price_history) < 10:
+        live_history = _get_provider().get_history(ts, days=90)
+        price_history = []
+        for e in live_history:
+            bar_date_str = e['date'][:10]
+            price_history.append({
+                'date': bar_date_str,
+                'open': e['open'], 'high': e['high'],
+                'low': e['low'], 'close': e['close'], 'volume': e['volume'],
+            })
+            # Persist to DB so future requests don't need to re-fetch
+            try:
+                bar_date = datetime.strptime(bar_date_str, '%Y-%m-%d').date()
+                existing = await session.execute(
+                    select(models.PriceHistory)
+                    .where(
+                        models.PriceHistory.symbol == sym,
+                        models.PriceHistory.date == bar_date,
+                    )
+                    .limit(1)
+                )
+                if existing.scalar_one_or_none() is None:
+                    session.add(models.PriceHistory(
+                        symbol=sym,
+                        date=bar_date,
+                        open_price=e['open'],
+                        high_price=e['high'],
+                        low_price=e['low'],
+                        close_price=e['close'],
+                        volume=int(e.get('volume', 0)),
+                    ))
+            except Exception:
+                pass  # Non-blocking persistence
+        await session.commit()
 
     # 3. News for this symbol
     news_result = await session.execute(
-        select(NewsArticle)
-        .where(NewsArticle.symbol == sym)
-        .order_by(NewsArticle.published_at.desc())
+        select(models.NewsArticle)
+        .where(models.NewsArticle.symbol == sym)
+        .order_by(models.NewsArticle.published_at.desc())
         .limit(10)
     )
     news_items = [
@@ -101,12 +127,12 @@ async def get_research(
     # Cache: return existing analysis created within the last hour
     one_hour_ago = datetime.utcnow() - timedelta(hours=1)
     existing = await session.execute(
-        select(Analysis)
-        .where(Analysis.symbol == sym)
-        .order_by(Analysis.created_at.desc())
+        select(models.Analysis)
+        .where(models.Analysis.symbol == sym)
+        .order_by(models.Analysis.created_at.desc())
         .limit(1)
     )
-    recent = existing.scalar_one_or_none()
+    recent = cast(models.Analysis | None, existing.scalars().first())
 
     risks = (
         'Key risks include sector headwinds, macroeconomic uncertainty, '
@@ -148,8 +174,8 @@ async def get_research(
     avg_news_sentiment: float | None = None
     if news_items:
         sentiment_result = await session.execute(
-            select(func.avg(NewsArticle.sentiment))
-            .where(NewsArticle.symbol == sym)
+            select(func.avg(models.NewsArticle.sentiment))
+            .where(models.NewsArticle.symbol == sym)
         )
         avg_val = sentiment_result.scalar()
         if avg_val is not None:
@@ -183,7 +209,7 @@ async def get_research(
     thesis_result = await generate_thesis_async(analysis_input)
 
     # 6. Store analysis in DB
-    analysis = Analysis(
+    analysis = models.Analysis(
         symbol=sym,
         technical_score=scores['technical']['score'],
         news_sentiment_score=scores['news_sentiment']['score'],
