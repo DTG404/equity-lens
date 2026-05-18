@@ -9,6 +9,7 @@ from app.api.research_routes import router as research_router
 from app.api.settings_routes import router as settings_router
 from app.api.signals_routes import router as signals_router
 from app.api.macro_routes import router as macro_router
+from app.api.screener_routes import router as screener_router
 from app.api.technicals_routes import router as technicals_router
 from app.api.watchlist_routes import router as watchlist_router
 
@@ -23,6 +24,7 @@ router.include_router(alert_router)
 router.include_router(fundamentals_router)
 router.include_router(signals_router)
 router.include_router(macro_router)
+router.include_router(screener_router)
 router.include_router(technicals_router)
 
 
