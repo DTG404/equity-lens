@@ -122,7 +122,7 @@ export default function DashboardShell() {
     <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
       {/* ── Watchlist Section (2 cols) ── */}
       <section className="lg:col-span-2">
-        <div className="glass-panel overflow-hidden">
+        <div className="glass-panel animate-fade-in overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-white/[0.04] px-4 py-3">
             <h2 className="text-xs font-semibold uppercase tracking-wider gradient-text">
