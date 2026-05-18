@@ -1,6 +1,6 @@
 """Research aggregate endpoint for single-stock analysis page."""
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -99,7 +99,7 @@ async def get_research(
     ]
 
     # Cache: return existing analysis created within the last hour
-    one_hour_ago = datetime.now(UTC) - timedelta(hours=1)
+    one_hour_ago = datetime.utcnow() - timedelta(hours=1)
     existing = await session.execute(
         select(Analysis)
         .where(Analysis.symbol == sym)

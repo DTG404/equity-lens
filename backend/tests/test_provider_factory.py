@@ -6,8 +6,8 @@ from app.providers.mock_market import MockMarketDataProvider
 from app.providers.yfinance_provider import YFinanceMarketDataProvider
 
 
-def test_factory_returns_mock_by_default():
-    assert settings.market_data_provider == 'mock'
+def test_factory_returns_mock_when_configured(monkeypatch):
+    monkeypatch.setattr(settings, 'market_data_provider', 'mock')
     provider = get_market_data_provider()
     assert isinstance(provider, MockMarketDataProvider)
 

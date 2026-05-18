@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     discord_webhook_url: str = ''
 
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
-        env_file='.env', env_file_encoding='utf-8'
+        env_file='.env', env_file_encoding='utf-8', extra='ignore'
     )
 
 
