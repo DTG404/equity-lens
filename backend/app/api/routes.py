@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.api.alert_routes import router as alert_router
+from app.api.broker_routes import router as broker_router
 from app.api.fundamentals_routes import router as fundamentals_router
 from app.api.holdings_routes import router as holdings_router
 from app.api.macro_routes import router as macro_router
@@ -32,6 +33,7 @@ def health() -> dict[str, str]:
 router = APIRouter(dependencies=[Depends(verify_api_key)])
 router.include_router(portfolio_router)
 router.include_router(watchlist_router)
+router.include_router(broker_router)
 router.include_router(holdings_router)
 router.include_router(research_router)
 router.include_router(settings_router)
