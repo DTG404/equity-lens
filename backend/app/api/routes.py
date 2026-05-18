@@ -13,6 +13,7 @@ from app.api.screener_routes import router as screener_router
 from app.api.sec_routes import router as sec_router
 from app.api.settings_routes import router as settings_router
 from app.api.signals_routes import router as signals_router
+from app.api.social_routes import router as social_router
 from app.api.technicals_routes import router as technicals_router
 from app.api.watchlist_routes import router as watchlist_router
 from app.core.auth import verify_api_key
@@ -46,4 +47,5 @@ router.include_router(signals_router)
 router.include_router(macro_router)
 router.include_router(screener_router)
 router.include_router(sec_router, prefix='/sec')
+router.include_router(social_router)
 router.include_router(technicals_router)
