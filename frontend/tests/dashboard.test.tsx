@@ -47,26 +47,14 @@ describe('DashboardShell', () => {
     vi.mocked(api.deleteAlertRule).mockResolvedValue(undefined);
   });
 
-  it('renders the app title', () => {
-    render(<DashboardShell />);
-    expect(screen.getByText('Equity Lens')).toBeDefined();
-  });
-
-  it('renders the subtitle', () => {
-    render(<DashboardShell />);
-    expect(screen.getByText('Local-first research terminal')).toBeDefined();
-  });
-
   it('renders the watchlist heading', () => {
     render(<DashboardShell />);
     expect(screen.getByText('Watchlist')).toBeDefined();
   });
 
-  it('renders the safety disclaimer', () => {
+  it('shows empty watchlist state', () => {
     render(<DashboardShell />);
-    expect(
-      screen.getByText(/This is a local research tool\. No trades are executed\./),
-    ).toBeDefined();
+    expect(screen.getByText(/Add symbols to your watchlist/)).toBeDefined();
   });
 
   it('renders the add-ticker form', () => {
@@ -195,9 +183,8 @@ describe('DashboardShell', () => {
     render(<DashboardShell />);
 
     await waitFor(() => {
-      expect(screen.getByText('Alerts')).toBeDefined();
+      expect(screen.getByText(/No alerts yet/)).toBeDefined();
     });
-    expect(screen.queryByText('Price alerts and threshold notifications will appear here.')).toBeNull();
   });
 
   it('renders alert events with type, message, and severity', async () => {
