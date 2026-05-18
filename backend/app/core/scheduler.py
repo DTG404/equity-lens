@@ -401,7 +401,10 @@ def _run_async_job(async_func: Callable[..., Any]) -> Callable[[], Any]:
     """Wrap an async function for APScheduler's sync job interface."""
     def wrapper() -> None:
         try:
-            asyncio.create_task(_safe_run(async_func))
+            loop = asyncio.get_running_loop()
+            loop.create_task(_safe_run(async_func))
+        except RuntimeError:
+            logger.warning('No running event loop for job %s', async_func.__name__)
         except Exception as e:
             logger.error('Failed to schedule job %s: %s', async_func.__name__, e)
     return wrapper
