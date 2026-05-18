@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.alert_routes import router as alert_router
+from app.api.fundamentals_routes import router as fundamentals_router
 from app.api.holdings_routes import router as holdings_router
 from app.api.news_routes import router as news_router
 from app.api.quote_routes import router as quote_router
@@ -17,6 +18,7 @@ router.include_router(settings_router)
 router.include_router(quote_router)
 router.include_router(news_router)
 router.include_router(alert_router)
+router.include_router(fundamentals_router)
 router.include_router(signals_router)
 
 
