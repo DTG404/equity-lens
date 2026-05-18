@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     alpaca_api_key: str = ''
     alpaca_secret_key: str = ''
     alpaca_paper: bool = True
+    finnhub_api_key: str = ''
 
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
         env_file='.env', env_file_encoding='utf-8'
