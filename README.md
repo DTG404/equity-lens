@@ -150,6 +150,8 @@ npm run dev           # http://localhost:3000
 
 ### Dashboard (`/`)
 
+![Dashboard](/screenshots/dashboard.png)
+
 - **KPI strip** — portfolio value, signal accuracy, active alerts, market status
 - **Watchlist** — add tickers, view price + change + AI signal badges, click to research
 - **Alerts** — create price rules, view triggered events, mark read
@@ -158,6 +160,8 @@ npm run dev           # http://localhost:3000
 - **Macro dashboard** — 9 economic indicators (GDP, CPI, rates, unemployment)
 
 ### Research (`/stocks/{symbol}`)
+
+![Research Page](/screenshots/research.png)
 
 - **Candlestick chart** — interactive TradingView chart with volume, time range selector
 - **Fundamentals** — revenue, net income, EPS, D/E ratio, margins from SEC EDGAR
@@ -168,6 +172,8 @@ npm run dev           # http://localhost:3000
 - **Signal history** — past predictions and outcomes with accuracy metrics
 
 ### Screener (`/screener`)
+
+![Stock Screener](/screenshots/screener.png)
 
 Filter 80 popular stocks by price range, sector, RSI, and volume. Sortable columns with links to research pages.
 
