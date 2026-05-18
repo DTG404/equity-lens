@@ -7,6 +7,7 @@ import PriceChart from '@/components/PriceChart';
 import FactorScoreCard from '@/components/FactorScoreCard';
 import ScenarioCard from '@/components/ScenarioCard';
 import SignalHistory from '@/components/SignalHistory';
+import { FundamentalsPanel, TechnicalsPanel } from '@/components/ResearchPanels';
 import NavBar from '@/components/NavBar';
 import StatusBar from '@/components/StatusBar';
 
@@ -181,6 +182,12 @@ export default function ResearchPage({ params }: ResearchPageProps) {
               <div>
                 <FactorScoreCard scores={data.scores} />
               </div>
+            </div>
+
+            {/* Fundamentals + Technicals */}
+            <div className="mb-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
+              <FundamentalsPanel symbol={symbol} />
+              <TechnicalsPanel symbol={symbol} />
             </div>
 
             {/* Thesis + Scenarios */}

@@ -253,3 +253,96 @@ export async function markAllAlertsRead(): Promise<void> {
   });
   if (!response.ok) throw new Error('Failed to mark all alerts as read');
 }
+
+/* ── Fundamentals (SEC EDGAR) ──────────────────────────────── */
+
+export interface FundamentalsData {
+  symbol: string;
+  income_statement: {
+    revenue: number | null;
+    gross_profit: number | null;
+    operating_income: number | null;
+    net_income: number | null;
+  };
+  balance_sheet: {
+    total_assets: number | null;
+    total_liabilities: number | null;
+    current_assets: number | null;
+    current_liabilities: number | null;
+    equity: number | null;
+    long_term_debt: number | null;
+  };
+  cash_flow: {
+    operating_cash_flow: number | null;
+    free_cash_flow: number | null;
+  };
+  per_share: {
+    eps_basic: number | null;
+    eps_diluted: number | null;
+  };
+  ratios: {
+    debt_to_equity: number | null;
+    current_ratio: number | null;
+    net_margin: number | null;
+    gross_margin: number | null;
+  };
+}
+
+export async function fetchFundamentals(symbol: string): Promise<FundamentalsData> {
+  const response = await fetch(`${API_BASE}/api/fundamentals/${symbol}`);
+  if (!response.ok) throw new Error('Failed to fetch fundamentals');
+  return response.json() as Promise<FundamentalsData>;
+}
+
+/* ── Technical Indicators (TA-Lib) ─────────────────────────── */
+
+export interface TechnicalsData {
+  symbol: string;
+  rsi: number | null;
+  macd: {
+    macd_line: number | null;
+    signal_line: number | null;
+    histogram: number | null;
+  };
+  moving_averages: {
+    sma_20: number | null;
+    sma_50: number | null;
+    sma_200: number | null;
+    ema_12: number | null;
+    ema_26: number | null;
+  };
+  bollinger_bands: {
+    upper: number | null;
+    middle: number | null;
+    lower: number | null;
+  };
+  atr: number | null;
+}
+
+export async function fetchTechnicals(symbol: string): Promise<TechnicalsData> {
+  const response = await fetch(`${API_BASE}/api/technicals/${symbol}`);
+  if (!response.ok) throw new Error('Failed to fetch technicals');
+  return response.json() as Promise<TechnicalsData>;
+}
+
+/* ── Macro Dashboard (FRED) ────────────────────────────────── */
+
+export interface MacroIndicator {
+  name: string;
+  value: number;
+  previous: number | null;
+  change: number | null;
+  unit: string;
+}
+
+export interface MacroData {
+  source: string;
+  note?: string;
+  indicators: Record<string, MacroIndicator>;
+}
+
+export async function fetchMacro(): Promise<MacroData> {
+  const response = await fetch(`${API_BASE}/api/macro`);
+  if (!response.ok) throw new Error('Failed to fetch macro data');
+  return response.json() as Promise<MacroData>;
+}
