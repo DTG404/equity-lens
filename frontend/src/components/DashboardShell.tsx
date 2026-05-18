@@ -125,7 +125,7 @@ export default function DashboardShell() {
         <div className="glass-panel overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-white/[0.04] px-4 py-3">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
+            <h2 className="text-xs font-semibold uppercase tracking-wider gradient-text">
               Watchlist
             </h2>
             <span className="font-mono text-[0.55rem] text-white/20">
@@ -144,7 +144,7 @@ export default function DashboardShell() {
             />
             <button
               type="submit"
-              className="glass-badge-cyan rounded-lg px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-all hover:bg-cyan-400/20"
+              className="glass-badge-cyan inline-flex items-center rounded-lg px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-opacity hover:opacity-80"
             >
               Add
             </button>
@@ -159,7 +159,7 @@ export default function DashboardShell() {
 
           {/* Table header */}
           {watchlist.length > 0 && (
-            <div className="flex border-b border-white/[0.03] px-4 py-2 text-[0.6rem] font-medium uppercase tracking-wider text-white/25">
+            <div className="flex border-b border-white/[0.03] px-4 py-2 text-[0.6rem] font-medium uppercase tracking-wider text-white/30">
               <div className="flex-[2]">Symbol</div>
               <div className="flex-1 text-right">Price</div>
               <div className="flex-1 text-right">Change</div>
@@ -218,7 +218,7 @@ export default function DashboardShell() {
                   <button
                     type="button"
                     onClick={() => handleRemoveTicker(item.symbol)}
-                    className="rounded-md border border-white/[0.06] px-2 py-1 text-[0.6rem] text-white/30 transition-colors hover:border-red-400/30 hover:text-red-400"
+                    className="glass-badge-red inline-block rounded-full px-2 py-0.5 font-mono text-[0.6rem] transition-opacity hover:opacity-80"
                   >
                     ✕
                   </button>
@@ -238,9 +238,9 @@ export default function DashboardShell() {
       {/* ── Right Column: Alerts + Holdings ── */}
       <section className="flex flex-col gap-3">
         {/* Alerts */}
-        <div className="glass-panel">
+        <div className="glass-panel overflow-hidden">
           <div className="border-b border-white/[0.04] px-4 py-3">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
+            <h2 className="text-xs font-semibold uppercase tracking-wider gradient-text">
               Alerts
             </h2>
           </div>
@@ -250,9 +250,9 @@ export default function DashboardShell() {
         </div>
 
         {/* Holdings */}
-        <div className="glass-panel">
+        <div className="glass-panel overflow-hidden">
           <div className="border-b border-white/[0.04] px-4 py-3">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
+            <h2 className="text-xs font-semibold uppercase tracking-wider gradient-text">
               Holdings
             </h2>
           </div>
@@ -260,21 +260,31 @@ export default function DashboardShell() {
             {holdings.length === 0 ? (
               <p className="py-2 text-xs text-white/25">No holdings yet</p>
             ) : (
-              <div className="mb-3">
-                {holdings.map((holding) => (
-                  <div
-                    key={holding.id}
-                    className="flex items-center justify-between border-b border-white/[0.03] py-2 last:border-0"
-                  >
-                    <span className="font-mono text-sm font-semibold text-[#f0f6fc]">
-                      {holding.symbol}
-                    </span>
-                    <span className="text-xs text-white/40">
-                      {holding.quantity} @ ${holding.average_cost.toFixed(2)}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              <>
+                <div className="flex border-b border-white/[0.03] px-2 py-2 text-[0.6rem] font-medium uppercase tracking-wider text-white/30">
+                  <div className="flex-[2]">Symbol</div>
+                  <div className="flex-1 text-right">Qty</div>
+                  <div className="flex-1 text-right">Cost</div>
+                </div>
+                <div className="mb-3">
+                  {holdings.map((holding) => (
+                    <div
+                      key={holding.id}
+                      className="flex items-center border-b border-white/[0.03] px-2 py-2.5 text-sm last:border-0 transition-colors hover:bg-white/[0.01]"
+                    >
+                      <div className="flex-[2] font-mono text-sm font-semibold text-[#f0f6fc]">
+                        {holding.symbol}
+                      </div>
+                      <div className="flex-1 text-right font-mono text-xs text-[#f0f6fc]">
+                        {holding.quantity}
+                      </div>
+                      <div className="flex-1 text-right font-mono text-xs text-white/40">
+                        ${holding.average_cost.toFixed(2)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
 
             <form onSubmit={handleAddHolding} className="flex flex-col gap-2">
@@ -303,7 +313,7 @@ export default function DashboardShell() {
               </div>
               <button
                 type="submit"
-                className="glass-badge-cyan w-full rounded-lg px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-all hover:bg-cyan-400/20"
+                className="glass-badge-cyan inline-flex items-center justify-center w-full rounded-lg px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-opacity hover:opacity-80"
               >
                 Add Holding
               </button>
@@ -314,9 +324,9 @@ export default function DashboardShell() {
 
       {/* ── News Feed (full width below) ── */}
       <section className="lg:col-span-3">
-        <div className="glass-panel">
+        <div className="glass-panel overflow-hidden">
           <div className="flex items-center justify-between border-b border-white/[0.04] px-4 py-3">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
+            <h2 className="text-xs font-semibold uppercase tracking-wider gradient-text">
               News Feed
             </h2>
             {news.length > 0 && (
@@ -325,7 +335,7 @@ export default function DashboardShell() {
               </span>
             )}
           </div>
-          <div className="px-4 py-2">
+          <div className="max-h-96 overflow-y-auto px-4 py-2">
             {news.length === 0 ? (
               <p className="py-3 text-center text-xs text-white/25">No recent news.</p>
             ) : (
