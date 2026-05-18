@@ -30,18 +30,6 @@ function formatRelativeTime(dateString: string | null): string {
   return 'just now';
 }
 
-function getSignalBadge(symbol: string, price: number | null) {
-  if (price === null) return null;
-  // Deterministic signal based on symbol for demo purposes
-  const bullish = ['AAPL', 'NVDA', 'GOOGL', 'AMZN', 'META'];
-  const neutral = ['MSFT', 'TSLA', 'SPY', 'QQQ'];
-  if (bullish.includes(symbol))
-    return { label: 'BULLISH', cls: 'glass-badge-green text-green-400' };
-  if (neutral.includes(symbol))
-    return { label: 'NEUTRAL', cls: 'glass-badge-amber text-amber-400' };
-  return { label: 'BEARISH', cls: 'glass-badge-red text-red-400' };
-}
-
 export default function DashboardShell() {
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [holdings, setHoldings] = useState<HoldingItem[]>([]);
@@ -182,7 +170,7 @@ export default function DashboardShell() {
                 : item.change_percent > 0
                   ? '+'
                   : '';
-            const signal = getSignalBadge(item.symbol, item.price);
+            const signal = item.signal ? { label: item.signal.toUpperCase(), cls: item.signal === 'bullish' ? 'glass-badge-green text-green-400' : item.signal === 'bearish' ? 'glass-badge-red text-red-400' : 'glass-badge-amber text-amber-400' } : null;
             return (
               <div
                 key={item.symbol}

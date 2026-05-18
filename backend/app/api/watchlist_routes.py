@@ -4,11 +4,11 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, field_validator
-from sqlalchemy import select
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_session
-from app.domain.db_models import CompanyInfo, PriceSnapshot, WatchlistEntry
+from app.domain.db_models import Analysis, CompanyInfo, PriceSnapshot, WatchlistEntry
 from app.domain.models import TickerSymbol
 from app.providers import get_market_data_provider
 
@@ -54,6 +54,20 @@ async def list_watchlist(
             'price': price.price if price else None,
             'change_percent': price.change_percent if price else None,
         })
+    for entry in output:
+        analysis_result = await session.execute(
+            select(Analysis.stance, Analysis.overall_score)
+            .where(Analysis.symbol == entry['symbol'])
+            .order_by(desc(Analysis.created_at))
+            .limit(1)
+        )
+        row = analysis_result.one_or_none()
+        if row:
+            entry['signal'] = row[0]
+            entry['confidence'] = round(float(row[1]) * 100, 1) if row[1] else None
+        else:
+            entry['signal'] = None
+            entry['confidence'] = None
     return output
 
 

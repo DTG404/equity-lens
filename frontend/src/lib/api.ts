@@ -5,6 +5,8 @@ export interface WatchlistItem {
   company_name: string;
   price: number | null;
   change_percent: number | null;
+  signal?: string | null;
+  confidence?: number | null;
 }
 
 export interface Quote {
