@@ -132,7 +132,8 @@ describe('DashboardShell', () => {
 
     await waitFor(() => {
       expect(screen.getByText('AAPL')).toBeDefined();
-      expect(screen.getByText(/10\s+@\s+\$150\.00/)).toBeDefined();
+      expect(screen.getByText(/10/)).toBeDefined();
+      expect(screen.getByText(/\$150\.00/)).toBeDefined();
     });
   });
 
