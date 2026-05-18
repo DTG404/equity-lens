@@ -65,7 +65,7 @@ async def get_research(
     )
     price_history = [
         {
-            'date': h.date.isoformat() if hasattr(h.date, 'isoformat') else str(h.date),
+            'date': str(h.date) if not hasattr(h.date, 'isoformat') else str(h.date)[:10],
             'open': h.open_price, 'high': h.high_price,
             'low': h.low_price, 'close': h.close_price, 'volume': h.volume,
         }

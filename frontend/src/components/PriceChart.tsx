@@ -62,9 +62,9 @@ export default function PriceChart({ data }: PriceChartProps) {
       scaleMargins: { top: 0.8, bottom: 0 }, borderColor: 'rgba(255,255,255,0.06)',
     });
 
-    const candleData = data.map((d) => ({ time: d.date as any, open: d.open, high: d.high, low: d.low, close: d.close }));
+    const candleData = data.map((d) => ({ time: d.date.slice(0, 10) as any, open: d.open, high: d.high, low: d.low, close: d.close }));
     const volumeData = data.map((d) => ({
-      time: d.date as any, value: d.volume,
+      time: d.date.slice(0, 10) as any, value: d.volume,
       color: d.close >= d.open ? 'rgba(74,222,128,0.2)' : 'rgba(248,113,113,0.2)',
     }));
 
