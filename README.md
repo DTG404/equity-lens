@@ -11,18 +11,33 @@ Equity Lens is a futuristic financial research terminal with a liquid glass UI, 
 ### Data & Analysis
 - **Watchlist management** — add/remove US stock tickers with live price tracking and AI signal badges
 - **SEC EDGAR fundamentals** — revenue, net income, EPS, balance sheet, ratios, free cash flow (free, audit-quality)
+- **SEC filings browser** — view recent 10-K, 10-Q, 8-K filings in-app
+- **Insider trading** — monitor Form 4 insider transactions per ticker
+- **Institutional ownership** — track 13F filing data per ticker
+- **DCF valuation** — automated fair value estimates from SEC EDGAR fundamentals
 - **TA-Lib technical indicators** — RSI, MACD, SMA/EMA, Bollinger Bands, ATR
 - **FRED macroeconomic dashboard** — GDP, CPI, unemployment, Fed funds rate, Treasury yields, consumer sentiment
+- **Social sentiment** — StockTwits bullish/bearish sentiment overlay
 - **Stock screener** — 80-ticker universe filtered by price, sector, RSI, volume, with sortable results
+- **Premium news** — Finnhub news provider with yfinance fallback
+- **Earnings calendar** — upcoming earnings dates with consensus estimates
 - **AI-powered analysis** — DeepSeek-generated thesis with bull/base/bear scenarios and factor scoring
-- **Price history** — candlestick chart with volume histogram (TradingView Lightweight Charts)
+- **Price chart** — interactive candlestick chart with volume histogram (TradingView Lightweight Charts)
 - **Per-ticker news** — deduplicated financial news with sentiment scoring
 - **Signal tracking** — 1d/1w/1m accuracy measurement with outcome logging
+- **Signal backtesting** — aggregate accuracy and returns by stance and time window
+- **Live quotes** — WebSocket streaming of real-time prices (push every 5s)
 
-### Portfolio
+### Portfolio & Broker
 - **Holdings management** — manual positions with quantity and average cost
 - **Portfolio performance** — P&L tracking per position, total value, cost basis, return percentage
+- **CSV import/export** — import holdings from CSV, export to CSV
 - **Alpaca broker sync** — import real portfolio positions from Alpaca Markets (paper or live)
+
+### Alerts & Notifications
+- **Alert center** — configurable price alerts with threshold conditions, severity levels, read/unread tracking
+- **Discord notifications** — receive alert notifications via Discord webhook
+- **Email notifications** — receive alert notifications via SMTP email
 
 ### UI/UX
 - **Liquid Glass design** — frosted glass panels with cosmic eclipse animated background
@@ -178,7 +193,14 @@ AI signal accuracy tracking, historical outcomes, and performance analysis by st
 | `ALPACA_API_KEY` | — | Alpaca Markets API key |
 | `ALPACA_SECRET_KEY` | — | Alpaca Markets secret key |
 | `ALPACA_PAPER` | `true` | Use Alpaca paper trading API |
-| `API_KEY` | — | API key for endpoint auth |
+| `FINNHUB_API_KEY` | — | Finnhub API key for news & earnings |
+| `DISCORD_WEBHOOK_URL` | — | Discord webhook URL for alert delivery |
+| `SMTP_HOST` | — | SMTP server for email notifications |
+| `SMTP_PORT` | `587` | SMTP server port |
+| `SMTP_USER` | — | SMTP username |
+| `SMTP_PASSWORD` | — | SMTP password |
+| `ALERT_EMAIL` | — | Recipient email for alerts |
+| `API_KEY` | — | API key for endpoint authentication |
 | `API_KEY_ENABLED` | `false` | Enable API key authentication |
 | `QUOTE_POLL_SECONDS` | `60` | Quote polling interval |
 | `NEWS_POLL_SECONDS` | `300` | News polling interval |
@@ -225,9 +247,32 @@ AI signal accuracy tracking, historical outcomes, and performance analysis by st
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/research/{symbol}` | Full research (quote, chart, scores, thesis, scenarios, risks) |
-| GET | `/api/fundamentals/{symbol}` | SEC EDGAR financials |
-| GET | `/api/technicals/{symbol}` | TA-Lib indicators |
-| GET | `/api/macro` | FRED economic dashboard |
+| GET | `/api/fundamentals/{symbol}` | SEC EDGAR financials (revenue, net income, EPS, ratios) |
+| GET | `/api/technicals/{symbol}` | TA-Lib indicators (RSI, MACD, SMA, Bollinger, ATR) |
+| GET | `/api/macro` | FRED economic dashboard (GDP, CPI, rates, unemployment) |
+| GET | `/api/dcf/{symbol}` | DCF valuation (fair value from SEC EDGAR fundamentals) |
+
+### Filings & Ownership
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/sec/filings/{symbol}` | SEC filings browser (10-K, 10-Q, 8-K) |
+| GET | `/api/sec/insider/{symbol}` | Insider trading (Form 4 transactions) |
+| GET | `/api/sec/institutional/{symbol}` | Institutional ownership (13F filings) |
+
+### Social Sentiment
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/sentiment/{symbol}` | StockTwits bullish/bearish sentiment |
+
+### News & Earnings
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/finnhub/news/{symbol}` | Premium news via Finnhub (yfinance fallback) |
+| GET | `/api/finnhub/earnings/{symbol}` | Earnings history with estimates/surprises |
+| GET | `/api/finnhub/earnings-calendar` | Upcoming earnings across the market |
 
 ### Alerts
 
@@ -252,20 +297,34 @@ AI signal accuracy tracking, historical outcomes, and performance analysis by st
 |--------|------|-------------|
 | GET | `/api/screener` | Filter stocks by price, sector, RSI, volume |
 
-### Portfolio
+### Portfolio & Broker
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/portfolio/performance` | P&L calculations per position |
+| GET | `/api/broker/status` | Alpaca connection status |
+| POST | `/api/broker/sync` | Import positions from Alpaca |
+| GET | `/api/csv/holdings` | Export holdings as CSV |
+| POST | `/api/csv/holdings/import` | Import holdings from CSV file |
 
-### Broker
+### Backtesting & Signals
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/api/broker/status` | Alpaca connection status |
-| POST | `/api/broker/sync` | Import positions from Alpaca |
+| GET | `/api/backtest/signals` | Signal accuracy by stance and window |
 
-### Settings
+### Notifications
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/notifications/status` | Check configured notification channels |
+| POST | `/api/notifications/test` | Send test notification to all channels |
+
+### WebSocket
+
+| Path | Description |
+|------|-------------|
+| `ws://localhost:8000/ws/quotes` | Live streaming quotes (push every 5s) |
 
 | Method | Path | Description |
 |--------|------|-------------|

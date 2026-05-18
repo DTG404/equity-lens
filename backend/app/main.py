@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import public_router, router
+from app.api.ws_routes import router as ws_router
 from app.core.db import close_db, init_db
 from app.core.scheduler import start_scheduler, stop_scheduler
 
@@ -28,3 +29,4 @@ app.add_middleware(
 )
 app.include_router(public_router, prefix='/api')
 app.include_router(router, prefix='/api')
+app.include_router(ws_router)  # No /api prefix for WebSocket
