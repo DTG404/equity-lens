@@ -15,6 +15,7 @@ export default function ScreenerPage() {
   const [results, setResults] = useState<ScreenerResult[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
   const [sector, setSector] = useState('');
@@ -25,6 +26,7 @@ export default function ScreenerPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const params: Record<string, string | number> = { sortBy, sortDir, limit: 50 };
       if (priceMin) params.priceMin = parseFloat(priceMin);
@@ -37,7 +39,7 @@ export default function ScreenerPage() {
       setResults(data.results);
       setTotal(data.total);
     } catch (err) {
-      console.error('Screener error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load screener');
     } finally {
       setLoading(false);
     }
@@ -105,6 +107,13 @@ export default function ScreenerPage() {
               Filter
             </button>
           </div>
+
+          {/* Error */}
+          {error && (
+            <div className="border-b border-white/[0.04] px-4 py-3 text-xs text-red-400">
+              {error}
+            </div>
+          )}
 
           {/* Results */}
           {loading ? (
