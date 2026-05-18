@@ -8,6 +8,7 @@ from app.api.quote_routes import router as quote_router
 from app.api.research_routes import router as research_router
 from app.api.settings_routes import router as settings_router
 from app.api.signals_routes import router as signals_router
+from app.api.technicals_routes import router as technicals_router
 from app.api.watchlist_routes import router as watchlist_router
 
 router = APIRouter()
@@ -20,6 +21,7 @@ router.include_router(news_router)
 router.include_router(alert_router)
 router.include_router(fundamentals_router)
 router.include_router(signals_router)
+router.include_router(technicals_router)
 
 
 @router.get('/health')
