@@ -19,84 +19,38 @@ interface FactorScoreCardProps {
 
 type FactorKey = 'technical' | 'news_sentiment' | 'fundamentals' | 'macro';
 
-const factorLabels: Record<FactorKey, string> = {
-  technical: 'Technical',
-  news_sentiment: 'News Sentiment',
-  fundamentals: 'Fundamentals',
-  macro: 'Macro',
+const factorConfig: Record<FactorKey, { label: string; gradient: string }> = {
+  technical: { label: 'Technical', gradient: 'from-green-400 to-cyan-400' },
+  news_sentiment: { label: 'News Sentiment', gradient: 'from-amber-400 to-orange-400' },
+  fundamentals: { label: 'Fundamentals', gradient: 'from-cyan-400 to-blue-400' },
+  macro: { label: 'Macro', gradient: 'from-purple-400 to-pink-400' },
 };
 
-function ScoreBar({
-  label,
-  score,
-  explanation,
-}: {
-  label: string;
-  score: number;
-  explanation: string;
-}) {
+function ScoreBar({ label, score, explanation, gradient }: { label: string; score: number; explanation: string; gradient: string }) {
   const [hovered, setHovered] = useState(false);
   const percentage = Math.round(score * 100);
 
   const barColor =
-    score >= 0.7 ? '#22c55e' : score >= 0.4 ? '#eab308' : '#ef4444';
+    score >= 0.7 ? 'bg-green-400' : score >= 0.4 ? 'bg-amber-400' : 'bg-red-400';
 
   return (
     <div
-      style={{ marginBottom: 16, position: 'relative' }}
+      className="relative mb-3"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 6,
-        }}
-      >
-        <span style={{ fontSize: 14, fontWeight: 600 }}>{label}</span>
-        <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-          {percentage}%
-        </span>
+      <div className="mb-1 flex items-center justify-between">
+        <span className="text-xs font-semibold text-white/60">{label}</span>
+        <span className="font-mono text-xs text-white/40">{percentage}%</span>
       </div>
-      <div
-        style={{
-          width: '100%',
-          height: 8,
-          background: 'var(--bg-secondary)',
-          borderRadius: 4,
-          overflow: 'hidden',
-        }}
-      >
+      <div className={`h-2 w-full overflow-hidden rounded-full bg-white/[0.04]`}>
         <div
-          style={{
-            width: `${percentage}%`,
-            height: '100%',
-            background: barColor,
-            borderRadius: 4,
-            transition: 'width 0.3s ease',
-          }}
+          className={`h-full rounded-full bg-gradient-to-r ${gradient} transition-all duration-300`}
+          style={{ width: `${percentage}%` }}
         />
       </div>
       {hovered && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            marginTop: 4,
-            padding: '8px 12px',
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border)',
-            borderRadius: 6,
-            fontSize: 12,
-            color: 'var(--text-secondary)',
-            zIndex: 10,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-          }}
-        >
+        <div className="glass-panel-sm absolute left-0 right-0 top-full z-10 mt-1 px-3 py-2 text-xs text-white/50 shadow-lg">
           {explanation}
         </div>
       )}
@@ -106,65 +60,32 @@ function ScoreBar({
 
 export default function FactorScoreCard({ scores }: FactorScoreCardProps) {
   const overallPercentage = Math.round(scores.overall * 100);
-
   const overallColor =
-    scores.overall >= 0.7
-      ? '#22c55e'
-      : scores.overall >= 0.4
-        ? '#eab308'
-        : '#ef4444';
+    scores.overall >= 0.7 ? 'text-green-400' : scores.overall >= 0.4 ? 'text-amber-400' : 'text-red-400';
 
   return (
-    <div
-      style={{
-        background: 'var(--bg-card)',
-        borderRadius: 8,
-        padding: 20,
-        border: '1px solid var(--border)',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 20,
-          paddingBottom: 16,
-          borderBottom: '1px solid var(--border)',
-        }}
-      >
-        <span style={{ fontSize: 16, fontWeight: 700 }}>Factor Scores</span>
-        <div style={{ textAlign: 'right' }}>
-          <div
-            style={{
-              fontSize: 24,
-              fontWeight: 800,
-              color: overallColor,
-              lineHeight: 1,
-            }}
-          >
+    <div className="glass-panel p-4">
+      <div className="mb-4 flex items-center justify-between border-b border-white/[0.04] pb-4">
+        <span className="text-xs font-semibold uppercase tracking-wider text-white/40">
+          Factor Scores
+        </span>
+        <div className="text-right">
+          <div className={`font-mono text-2xl font-bold leading-none ${overallColor}`}>
             {overallPercentage}%
           </div>
-          <div
-            style={{
-              fontSize: 11,
-              color: 'var(--text-secondary)',
-              textTransform: 'uppercase',
-              letterSpacing: 0.5,
-              marginTop: 2,
-            }}
-          >
+          <div className="mt-0.5 text-[0.6rem] uppercase tracking-wider text-white/30">
             Overall
           </div>
         </div>
       </div>
 
-      {(Object.keys(factorLabels) as FactorKey[]).map((key) => (
+      {(Object.keys(factorConfig) as FactorKey[]).map((key) => (
         <ScoreBar
           key={key}
-          label={factorLabels[key]}
+          label={factorConfig[key].label}
           score={scores[key].score}
           explanation={scores[key].explanation}
+          gradient={factorConfig[key].gradient}
         />
       ))}
     </div>

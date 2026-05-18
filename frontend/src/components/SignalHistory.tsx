@@ -1,7 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { fetchSignalOutcomes, fetchSignalMetrics, type SignalOutcome, type SignalMetrics } from '@/lib/api';
+import {
+  fetchSignalOutcomes,
+  fetchSignalMetrics,
+  type SignalOutcome,
+  type SignalMetrics,
+} from '@/lib/api';
 
 interface SignalHistoryProps {
   symbol?: string;
@@ -15,7 +20,6 @@ export default function SignalHistory({ symbol }: SignalHistoryProps) {
 
   useEffect(() => {
     let cancelled = false;
-
     async function load() {
       try {
         setLoading(true);
@@ -33,102 +37,56 @@ export default function SignalHistory({ symbol }: SignalHistoryProps) {
           setError(err instanceof Error ? err.message : 'Failed to load signal history');
         }
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
       }
     }
-
     load();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [symbol]);
 
   if (loading) {
     return (
-      <div
-        style={{
-          background: 'var(--bg-card)',
-          borderRadius: 8,
-          padding: 16,
-          border: '1px solid var(--border)',
-        }}
-      >
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Loading signal history...</p>
+      <div className="glass-panel p-4">
+        <p className="text-xs text-white/30">Loading signal history...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div
-        style={{
-          background: 'var(--bg-card)',
-          borderRadius: 8,
-          padding: 16,
-          border: '1px solid var(--border)',
-        }}
-      >
-        <p style={{ fontSize: 13, color: 'var(--accent-red)' }}>{error}</p>
+      <div className="glass-panel p-4">
+        <p className="text-xs text-red-400">{error}</p>
       </div>
     );
   }
 
   if (outcomes.length === 0) {
     return (
-      <div
-        style={{
-          background: 'var(--bg-card)',
-          borderRadius: 8,
-          padding: 16,
-          border: '1px solid var(--border)',
-        }}
-      >
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>No signal outcomes available.</p>
+      <div className="glass-panel p-4">
+        <p className="text-xs text-white/30">No signal outcomes available.</p>
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        background: 'var(--bg-card)',
-        borderRadius: 8,
-        padding: 16,
-        border: '1px solid var(--border)',
-      }}
-    >
+    <div className="glass-panel overflow-hidden">
       {metrics && (
-        <div
-          style={{
-            display: 'flex',
-            gap: 24,
-            marginBottom: 16,
-            flexWrap: 'wrap',
-          }}
-        >
+        <div className="flex gap-6 border-b border-white/[0.04] px-4 py-3">
           <div data-testid="accuracy-metric">
-            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Accuracy</span>
-            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>
+            <span className="text-[0.6rem] uppercase tracking-wider text-white/30">Accuracy</span>
+            <div className="font-mono text-base font-bold text-[#f0f6fc]">
               {metrics.accuracy_pct.toFixed(2)}%
             </div>
           </div>
           <div data-testid="signals-count">
-            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Signals</span>
-            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>
+            <span className="text-[0.6rem] uppercase tracking-wider text-white/30">Signals</span>
+            <div className="font-mono text-base font-bold text-[#f0f6fc]">
               {metrics.total_signals}
             </div>
           </div>
           <div data-testid="avg-return">
-            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Avg Return</span>
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 700,
-                color: metrics.avg_return >= 0 ? '#22c55e' : '#ef4444',
-              }}
-            >
+            <span className="text-[0.6rem] uppercase tracking-wider text-white/30">Avg Return</span>
+            <div className={`font-mono text-base font-bold ${metrics.avg_return >= 0 ? 'text-green-400' : 'text-red-400'}`}>
               {metrics.avg_return >= 0 ? '+' : ''}
               {metrics.avg_return.toFixed(2)}%
             </div>
@@ -136,104 +94,34 @@ export default function SignalHistory({ symbol }: SignalHistoryProps) {
         </div>
       )}
 
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-xs">
           <thead>
-            <tr style={{ borderBottom: '1px solid var(--border)' }}>
-              <th
-                style={{
-                  textAlign: 'left',
-                  padding: '8px 12px',
-                  color: 'var(--text-secondary)',
-                  fontWeight: 600,
-                }}
-              >
-                Symbol
-              </th>
-              <th
-                style={{
-                  textAlign: 'left',
-                  padding: '8px 12px',
-                  color: 'var(--text-secondary)',
-                  fontWeight: 600,
-                }}
-              >
-                Stance
-              </th>
-              <th
-                style={{
-                  textAlign: 'left',
-                  padding: '8px 12px',
-                  color: 'var(--text-secondary)',
-                  fontWeight: 600,
-                }}
-              >
-                Window
-              </th>
-              <th
-                style={{
-                  textAlign: 'left',
-                  padding: '8px 12px',
-                  color: 'var(--text-secondary)',
-                  fontWeight: 600,
-                }}
-              >
-                Return
-              </th>
-              <th
-                style={{
-                  textAlign: 'left',
-                  padding: '8px 12px',
-                  color: 'var(--text-secondary)',
-                  fontWeight: 600,
-                }}
-              >
-                Result
-              </th>
+            <tr className="border-b border-white/[0.03] text-[0.6rem] uppercase tracking-wider text-white/25">
+              <th className="px-3 py-2 text-left font-medium">Symbol</th>
+              <th className="px-3 py-2 text-left font-medium">Stance</th>
+              <th className="px-3 py-2 text-left font-medium">Window</th>
+              <th className="px-3 py-2 text-left font-medium">Return</th>
+              <th className="px-3 py-2 text-left font-medium">Result</th>
             </tr>
           </thead>
           <tbody>
             {outcomes.map((outcome) => (
-              <tr
-                key={outcome.id}
-                style={{ borderBottom: '1px solid var(--border)' }}
-              >
-                <td style={{ padding: '8px 12px', color: 'var(--text-primary)' }}>
-                  {outcome.symbol}
-                </td>
-                <td
-                  style={{
-                    padding: '8px 12px',
-                    color: 'var(--text-primary)',
-                    textTransform: 'capitalize',
-                  }}
-                >
-                  {outcome.stance}
-                </td>
-                <td style={{ padding: '8px 12px', color: 'var(--text-primary)' }}>
-                  {outcome.window}
-                </td>
-                <td
-                  style={{
-                    padding: '8px 12px',
-                    color: outcome.return_pct >= 0 ? '#22c55e' : '#ef4444',
-                    fontWeight: 600,
-                  }}
-                >
+              <tr key={outcome.id} className="border-b border-white/[0.02] font-mono text-xs last:border-0">
+                <td className="px-3 py-2 text-[#f0f6fc]">{outcome.symbol}</td>
+                <td className="px-3 py-2 capitalize text-white/70">{outcome.stance}</td>
+                <td className="px-3 py-2 text-white/70">{outcome.window}</td>
+                <td className={`px-3 py-2 font-semibold ${outcome.return_pct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                   {outcome.return_pct >= 0 ? '+' : ''}
                   {outcome.return_pct.toFixed(2)}%
                 </td>
-                <td style={{ padding: '8px 12px' }}>
+                <td className="px-3 py-2">
                   <span
-                    style={{
-                      display: 'inline-block',
-                      padding: '2px 8px',
-                      borderRadius: 4,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      background: outcome.correct ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                      color: outcome.correct ? '#22c55e' : '#ef4444',
-                    }}
+                    className={`inline-block rounded-full px-2 py-0.5 font-mono text-[0.55rem] font-semibold ${
+                      outcome.correct
+                        ? 'glass-badge-green'
+                        : 'glass-badge-red'
+                    }`}
                   >
                     {outcome.correct ? 'Correct' : 'Incorrect'}
                   </span>
