@@ -1,6 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from app.api.alert_routes import router as alert_router
+from app.api.broker_routes import router as broker_router
 from app.api.fundamentals_routes import router as fundamentals_router
 from app.api.holdings_routes import router as holdings_router
 from app.api.macro_routes import router as macro_router
@@ -13,10 +14,26 @@ from app.api.settings_routes import router as settings_router
 from app.api.signals_routes import router as signals_router
 from app.api.technicals_routes import router as technicals_router
 from app.api.watchlist_routes import router as watchlist_router
+from app.core.auth import verify_api_key
 
-router = APIRouter()
+# Public router for unauthenticated endpoints
+public_router = APIRouter()
+
+
+@public_router.get('/health')
+def health() -> dict[str, str]:
+    return {
+        'service': 'equity-lens-api',
+        'status': 'ok',
+        'mode': 'local-first',
+    }
+
+
+# Main router with optional API key auth
+router = APIRouter(dependencies=[Depends(verify_api_key)])
 router.include_router(portfolio_router)
 router.include_router(watchlist_router)
+router.include_router(broker_router)
 router.include_router(holdings_router)
 router.include_router(research_router)
 router.include_router(settings_router)
@@ -28,12 +45,3 @@ router.include_router(signals_router)
 router.include_router(macro_router)
 router.include_router(screener_router)
 router.include_router(technicals_router)
-
-
-@router.get('/health')
-def health() -> dict[str, str]:
-    return {
-        'service': 'equity-lens-api',
-        'status': 'ok',
-        'mode': 'local-first',
-    }

@@ -13,6 +13,11 @@ class Settings(BaseSettings):
     alert_eval_seconds: int = 30
     signal_eval_seconds: int = 3600
     fred_api_key: str = ''
+    api_key: str = ''
+    api_key_enabled: bool = False
+    alpaca_api_key: str = ''
+    alpaca_secret_key: str = ''
+    alpaca_paper: bool = True
 
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
         env_file='.env', env_file_encoding='utf-8'
