@@ -147,68 +147,8 @@ body {
   inset: 0;
   pointer-events: none;
   overflow: hidden;
-  background:
-    /* Deep space gradient */
-    radial-gradient(100% 100% at 50% 45%, #020814 0%, #050510 40%, #020408 100%);
-}
-
-/* Central eclipse body */
-.cosmic-bg::before {
-  content: '';
-  position: absolute;
-  width: clamp(300px, 50vw, 600px);
-  height: clamp(300px, 50vw, 600px);
-  top: 42%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 40%, #020b18, #010712 60%, #000 100%);
-  box-shadow:
-    /* Inner sharp cyan rim */
-    0 0 4px rgba(53, 216, 255, 0.6),
-    /* Medium cyan glow */
-    0 0 12px rgba(0, 200, 255, 0.4),
-    /* Outer blue aura */
-    0 0 32px rgba(0, 180, 255, 0.25),
-    /* Wide atmospheric halo */
-    0 0 70px rgba(0, 120, 255, 0.12),
-    /* Bottom warm flare */
-    0 0 80px rgba(255, 200, 220, 0.06),
-    /* Opposite side dim glow */
-    0 0 120px rgba(0, 150, 255, 0.08);
-}
-
-/* Uneven ring overlay using conic-gradient */
-.cosmic-bg::after {
-  content: '';
-  position: absolute;
-  width: clamp(310px, 51vw, 620px);
-  height: clamp(310px, 51vw, 620px);
-  top: 42%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    rgba(53, 216, 255, 0.15) 30deg,
-    rgba(53, 216, 255, 0.4) 60deg,
-    rgba(53, 216, 255, 0.1) 90deg,
-    transparent 120deg,
-    transparent 150deg,
-    rgba(53, 216, 255, 0.05) 180deg,
-    rgba(53, 216, 255, 0.3) 210deg,
-    rgba(53, 216, 255, 0.6) 240deg,
-    rgba(53, 216, 255, 0.15) 260deg,
-    transparent 280deg,
-    transparent 310deg,
-    rgba(255, 200, 220, 0.15) 330deg,
-    rgba(255, 200, 220, 0.05) 345deg,
-    transparent 360deg
-  );
-  filter: blur(3px);
-  mask: radial-gradient(circle, transparent 48%, black 49%, black 51%, transparent 52%);
-  -webkit-mask: radial-gradient(circle, transparent 48%, black 49%, black 51%, transparent 52%);
+  background: url('/cosmic-bg.png') center 42% / cover no-repeat;
+  background-color: #020814;
 }
 
 /* Noise/grain overlay */
