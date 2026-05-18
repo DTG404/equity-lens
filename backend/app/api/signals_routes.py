@@ -13,8 +13,10 @@ router = APIRouter(prefix='/signals', tags=['signals'])
 async def list_outcomes(
     symbol: str = Query('', description='Filter by symbol'),
     session: AsyncSession = Depends(get_session),
+    skip: int = 0,
+    limit: int = 50,
 ) -> list[dict[str, object]]:
-    query = select(SignalOutcome).order_by(SignalOutcome.checked_at.desc()).limit(50)
+    query = select(SignalOutcome).order_by(SignalOutcome.checked_at.desc()).offset(skip).limit(limit)
     if symbol:
         query = query.where(SignalOutcome.symbol == symbol.upper())
     result = await session.execute(query)

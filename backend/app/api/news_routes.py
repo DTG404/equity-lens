@@ -14,9 +14,14 @@ router = APIRouter(prefix='/news', tags=['news'])
 @router.get('')
 async def get_all_news(
     session: AsyncSession = Depends(get_session),
+    skip: int = 0,
+    limit: int = 50,
 ) -> list[dict[str, Any]]:
     result = await session.execute(
-        select(NewsArticle).order_by(NewsArticle.published_at.desc()).limit(50)
+        select(NewsArticle)
+        .order_by(NewsArticle.published_at.desc())
+        .offset(skip)
+        .limit(limit)
     )
     return [_article_to_dict(a) for a in result.scalars().all()]
 
@@ -25,6 +30,8 @@ async def get_all_news(
 async def get_symbol_news(
     symbol: str,
     session: AsyncSession = Depends(get_session),
+    skip: int = 0,
+    limit: int = 25,
 ) -> list[dict[str, Any]]:
     sym = symbol.upper()
     entry = await session.execute(
@@ -37,7 +44,8 @@ async def get_symbol_news(
         select(NewsArticle)
         .where(NewsArticle.symbol == sym)
         .order_by(NewsArticle.published_at.desc())
-        .limit(25)
+        .offset(skip)
+        .limit(limit)
     )
     return [_article_to_dict(a) for a in result.scalars().all()]
 

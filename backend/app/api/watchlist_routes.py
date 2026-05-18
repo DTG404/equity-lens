@@ -29,8 +29,15 @@ class WatchlistCreateRequest(BaseModel):
 @router.get('')
 async def list_watchlist(
     session: AsyncSession = Depends(get_session),
+    skip: int = 0,
+    limit: int = 50,
 ) -> list[dict[str, Any]]:
-    result = await session.execute(select(WatchlistEntry).order_by(WatchlistEntry.created_at))
+    result = await session.execute(
+        select(WatchlistEntry)
+        .order_by(WatchlistEntry.created_at)
+        .offset(skip)
+        .limit(limit)
+    )
     entries = result.scalars().all()
     output = []
     for entry in entries:
