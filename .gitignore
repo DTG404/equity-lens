@@ -41,6 +41,7 @@ docs/
 *.so
 *.dylib
 *.dll
+*.tsbuildinfo
 
 # Knowledge graph (auto-generated)
 graphify-out/

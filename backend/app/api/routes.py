@@ -10,6 +10,7 @@ from app.api.fundamentals_routes import router as fundamentals_router
 from app.api.holdings_routes import router as holdings_router
 from app.api.macro_routes import router as macro_router
 from app.api.news_routes import router as news_router
+from app.api.notifications_routes import router as notifications_router
 from app.api.portfolio_routes import router as portfolio_router
 from app.api.quote_routes import router as quote_router
 from app.api.research_routes import router as research_router
@@ -57,3 +58,4 @@ router.include_router(screener_router)
 router.include_router(sec_router, prefix='/sec')
 router.include_router(social_router)
 router.include_router(technicals_router)
+router.include_router(notifications_router)
