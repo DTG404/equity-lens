@@ -67,7 +67,9 @@ async def compute_technicals(symbol: str) -> dict[str, Any]:
     atr_series = ta.atr(df['high'], df['low'], close, length=14)
 
     # Get latest values
-    def latest(series: pd.Series) -> float | None:
+    def latest(series: pd.Series | None) -> float | None:
+        if series is None:
+            return None
         vals = series.dropna()
         return round(float(vals.iloc[-1]), 2) if len(vals) > 0 else None
 
