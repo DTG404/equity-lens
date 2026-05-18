@@ -1,38 +1,39 @@
 """Background scheduler for periodic quote polling."""
+import asyncio
 import logging
 from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Any
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.interval import IntervalTrigger
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.db import _async_session_factory, init_db
 from app.domain.db_models import (
     AlertEvent,
     AlertRule,
     Analysis,
+    PriceHistory,
     PriceSnapshot,
     SignalOutcome,
     WatchlistEntry,
 )
 from app.domain.models import TickerSymbol
-from app.providers.base import MarketDataProvider
-from app.providers.mock_market import MockMarketDataProvider
 
 logger = logging.getLogger(__name__)
 
 
-def _get_provider() -> MarketDataProvider:
-    return MockMarketDataProvider()
-
-
 async def poll_watchlist_quotes(
-    provider: MarketDataProvider | None = None,
+    provider: Any | None = None,
     get_session: Callable[[], AsyncSession] | None = None,
 ) -> int:
     """Poll quotes for all watchlist entries and store in PriceSnapshot."""
-    prov = provider or _get_provider()
+    from app.providers import get_market_data_provider
+
+    prov = provider or get_market_data_provider()
 
     if get_session is not None:
         session = get_session()
@@ -45,7 +46,7 @@ async def poll_watchlist_quotes(
         return await _do_poll(session, prov)
 
 
-async def _do_poll(session: AsyncSession, provider: MarketDataProvider) -> int:
+async def _do_poll(session: AsyncSession, provider: Any) -> int:
     result = await session.execute(select(WatchlistEntry.symbol))
     symbols = [row[0] for row in result.all()]
 
@@ -61,6 +62,29 @@ async def _do_poll(session: AsyncSession, provider: MarketDataProvider) -> int:
                 provider=quote.provider,
             )
             session.add(snapshot)
+
+            from datetime import date
+            today = date.today()
+            existing_bar = await session.execute(
+                select(PriceHistory)
+                .where(
+                    PriceHistory.symbol == symbol,
+                    PriceHistory.date == today,
+                )
+                .limit(1)
+            )
+            if existing_bar.scalar_one_or_none() is None:
+                price = quote.price
+                bar = PriceHistory(
+                    symbol=symbol,
+                    date=today,
+                    open_price=price,
+                    high_price=price,
+                    low_price=price,
+                    close_price=price,
+                    volume=0,
+                )
+                session.add(bar)
             count += 1
         except Exception as e:
             logger.warning('Failed to poll %s: %s', symbol, e)
@@ -140,9 +164,9 @@ async def poll_watchlist_news(
     get_session: Callable[[], AsyncSession] | None = None,
 ) -> int:
     """Fetch news for all watchlist entries and store new articles."""
-    from app.providers.yfinance_news import YFinanceNewsProvider
+    from app.providers import get_news_provider
 
-    provider = YFinanceNewsProvider()
+    provider = get_news_provider()
 
     if get_session is not None:
         session = get_session()
@@ -296,3 +320,88 @@ async def _do_evaluate_outcomes(session: AsyncSession) -> int:
 
     await session.commit()
     return count
+
+
+# ── APScheduler daemon ──────────────────────────────────────────────────────────
+
+
+
+_scheduler: AsyncIOScheduler | None = None
+
+
+def start_scheduler() -> AsyncIOScheduler:
+    """Create and start the APScheduler instance with configured jobs."""
+    global _scheduler
+    if _scheduler is not None:
+        return _scheduler
+
+    _scheduler = AsyncIOScheduler()
+
+    if settings.quote_poll_seconds > 0:
+        _scheduler.add_job(
+            _run_async_job(poll_watchlist_quotes),
+            IntervalTrigger(seconds=settings.quote_poll_seconds),
+            id='poll_quotes',
+            name='Poll watchlist quotes',
+            replace_existing=True,
+        )
+
+    if settings.news_poll_seconds > 0:
+        _scheduler.add_job(
+            _run_async_job(poll_watchlist_news),
+            IntervalTrigger(seconds=settings.news_poll_seconds),
+            id='poll_news',
+            name='Poll watchlist news',
+            replace_existing=True,
+        )
+
+    if settings.alert_eval_seconds > 0:
+        _scheduler.add_job(
+            _run_async_job(evaluate_alerts),
+            IntervalTrigger(seconds=settings.alert_eval_seconds),
+            id='eval_alerts',
+            name='Evaluate alert rules',
+            replace_existing=True,
+        )
+
+    if settings.signal_eval_seconds > 0:
+        _scheduler.add_job(
+            _run_async_job(evaluate_signal_outcomes),
+            IntervalTrigger(seconds=settings.signal_eval_seconds),
+            id='eval_signals',
+            name='Evaluate signal outcomes',
+            replace_existing=True,
+        )
+
+    _scheduler.start()
+    logger.info('APScheduler started with %d jobs', len(_scheduler.get_jobs()))
+    return _scheduler
+
+
+def stop_scheduler() -> None:
+    """Shut down the APScheduler instance."""
+    global _scheduler
+    if _scheduler is None:
+        return
+    _scheduler.shutdown(wait=False)
+    _scheduler = None
+    logger.info('APScheduler shut down')
+
+
+def _run_async_job(async_func: Callable[..., Any]) -> Callable[[], Any]:
+    """Wrap an async function for APScheduler's sync job interface."""
+    def wrapper() -> None:
+        try:
+            asyncio.create_task(_safe_run(async_func))
+        except Exception as e:
+            logger.error('Failed to schedule job %s: %s', async_func.__name__, e)
+    return wrapper
+
+
+async def _safe_run(async_func: Callable[..., Any]) -> None:
+    """Run an async scheduler function with error isolation."""
+    try:
+        result = await async_func()
+        logger.info('Scheduler job %s completed: %s', async_func.__name__, result)
+    except Exception as e:
+        logger.error('Scheduler job %s failed: %s', async_func.__name__, e)

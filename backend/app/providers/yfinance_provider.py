@@ -4,7 +4,7 @@ from typing import Any
 import yfinance as yf
 
 from app.domain.models import TickerSymbol
-from app.providers.base import MarketDataProvider, Quote
+from app.providers.base import CompanyInfo, MarketDataProvider, Quote
 
 
 class YFinanceMarketDataProvider(MarketDataProvider):
@@ -26,6 +26,17 @@ class YFinanceMarketDataProvider(MarketDataProvider):
             price=round(float(price), 2),
             change_percent=round(float(change_percent), 2),
             provider=self.provider_name,
+        )
+
+    def get_company_info(self, symbol: TickerSymbol) -> CompanyInfo:
+        ticker = yf.Ticker(symbol.value)
+        info = ticker.info or {}
+        return CompanyInfo(
+            symbol=symbol.value.upper(),
+            company_name=str(info.get('longName', info.get('shortName', ''))),
+            sector=str(info.get('sector', '')),
+            industry=str(info.get('industry', '')),
+            description=str(info.get('longBusinessSummary', '')),
         )
 
     def get_history(self, symbol: TickerSymbol, days: int = 30) -> list[dict[str, Any]]:

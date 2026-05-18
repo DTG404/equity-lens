@@ -11,11 +11,13 @@ from app.core.deepseek import AnalysisInput, generate_thesis
 from app.domain.db_models import Analysis, NewsArticle, PriceHistory, PriceSnapshot, WatchlistEntry
 from app.domain.models import TickerSymbol
 from app.domain.scoring import compute_factor_scores
-from app.providers.mock_market import MockMarketDataProvider
+from app.providers import get_market_data_provider
+from app.providers.base import MarketDataProvider
 
 router = APIRouter(prefix='/research', tags=['research'])
 
-_provider = MockMarketDataProvider()
+def _get_provider() -> MarketDataProvider:
+    return get_market_data_provider()
 
 
 @router.get('/{symbol}')
@@ -46,7 +48,7 @@ async def get_research(
             'change_percent': row.change_percent, 'provider': row.provider,
         }
     else:
-        q = _provider.get_quote(ts)
+        q = _get_provider().get_quote(ts)
         quote = {
             'symbol': q.symbol, 'price': q.price,
             'change_percent': q.change_percent, 'provider': q.provider,
@@ -70,7 +72,7 @@ async def get_research(
 
     # If no history in DB, fetch live
     if not price_history:
-        live_history = _provider.get_history(ts, days=30)
+        live_history = _get_provider().get_history(ts, days=30)
         price_history = [
             {'date': e['date'], 'close': e['close'],
              'open': e['open'], 'high': e['high'],
