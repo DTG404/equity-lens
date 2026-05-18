@@ -11,9 +11,11 @@ from app.api.signals_routes import router as signals_router
 from app.api.macro_routes import router as macro_router
 from app.api.screener_routes import router as screener_router
 from app.api.technicals_routes import router as technicals_router
+from app.api.portfolio_routes import router as portfolio_router
 from app.api.watchlist_routes import router as watchlist_router
 
 router = APIRouter()
+router.include_router(portfolio_router)
 router.include_router(watchlist_router)
 router.include_router(holdings_router)
 router.include_router(research_router)
