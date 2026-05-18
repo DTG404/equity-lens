@@ -19,6 +19,12 @@ class Settings(BaseSettings):
     alpaca_secret_key: str = ''
     alpaca_paper: bool = True
     finnhub_api_key: str = ''
+    smtp_host: str = ''
+    smtp_port: int = 587
+    smtp_user: str = ''
+    smtp_password: str = ''
+    alert_email: str = ''
+    discord_webhook_url: str = ''
 
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
         env_file='.env', env_file_encoding='utf-8'

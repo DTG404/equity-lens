@@ -153,6 +153,15 @@ async def _do_evaluate(session: AsyncSession) -> int:
                 )
                 session.add(event)
                 count += 1
+
+                # Send notification (non-blocking)
+                from app.core.notifications import send_alert_notification
+                asyncio.create_task(send_alert_notification(
+                    alert_type=rule.alert_type,
+                    symbol=rule.symbol,
+                    message=event.message,
+                    severity=event.severity,
+                ))
         except Exception as e:
             logger.warning('Failed to evaluate rule %d: %s', rule.id, e)
 
