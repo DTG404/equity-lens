@@ -6,67 +6,27 @@ export interface ScenarioCardProps {
   bearCase: string;
 }
 
+const scenarios = [
+  { key: 'bull', title: 'Bull Case', borderColor: 'border-green-500/20', bgColor: 'bg-green-500/5', dotColor: 'bg-green-400' },
+  { key: 'base', title: 'Base Case', borderColor: 'border-cyan-500/20', bgColor: 'bg-cyan-500/5', dotColor: 'bg-cyan-400' },
+  { key: 'bear', title: 'Bear Case', borderColor: 'border-red-500/20', bgColor: 'bg-red-500/5', dotColor: 'bg-red-400' },
+];
+
 export default function ScenarioCard({ bullCase, baseCase, bearCase }: ScenarioCardProps) {
-  const scenarios = [
-    {
-      title: 'Bull Case',
-      text: bullCase,
-      headerColor: '#22c55e',
-      borderColor: 'rgba(34, 197, 94, 0.3)',
-    },
-    {
-      title: 'Base Case',
-      text: baseCase,
-      headerColor: '#3b82f6',
-      borderColor: 'rgba(59, 130, 246, 0.3)',
-    },
-    {
-      title: 'Bear Case',
-      text: bearCase,
-      headerColor: '#ef4444',
-      borderColor: 'rgba(239, 68, 68, 0.3)',
-    },
-  ];
+  const textMap = { bull: bullCase, base: baseCase, bear: bearCase };
 
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-        gap: 16,
-      }}
-    >
-      {scenarios.map((scenario) => (
-        <div
-          key={scenario.title}
-          style={{
-            background: 'var(--bg-card)',
-            borderRadius: 8,
-            border: `1px solid ${scenario.borderColor}`,
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              background: scenario.headerColor,
-              color: '#fff',
-              fontSize: 14,
-              fontWeight: 700,
-              padding: '10px 14px',
-              textAlign: 'center',
-            }}
-          >
-            {scenario.title}
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      {scenarios.map((s) => (
+        <div key={s.key} className={`glass-panel overflow-hidden ${s.borderColor} ${s.bgColor}`}>
+          <div className="flex items-center gap-2 border-b border-white/[0.04] px-3 py-2">
+            <span className={`h-1.5 w-1.5 rounded-full ${s.dotColor}`} />
+            <span className="text-xs font-bold uppercase tracking-wider text-white/60">
+              {s.title}
+            </span>
           </div>
-          <div
-            style={{
-              padding: 14,
-              fontSize: 13,
-              lineHeight: 1.6,
-              color: 'var(--text-primary)',
-            }}
-          >
-            {scenario.text}
+          <div className="px-3 py-2 text-xs leading-relaxed text-white/50">
+            {textMap[s.key as 'bull' | 'base' | 'bear']}
           </div>
         </div>
       ))}
