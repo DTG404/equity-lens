@@ -3,7 +3,7 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import select, desc
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_session
@@ -41,7 +41,10 @@ async def get_portfolio_performance(
         value = h.quantity * current_price
         total_value += value
         pl = value - cost
-        pl_pct = ((current_price - h.average_cost) / h.average_cost) * 100 if h.average_cost else 0.0
+        pl_pct = (
+            ((current_price - h.average_cost) / h.average_cost) * 100
+            if h.average_cost else 0.0
+        )
 
         positions.append({
             'symbol': h.symbol,

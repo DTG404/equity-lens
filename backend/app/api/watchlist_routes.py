@@ -54,20 +54,20 @@ async def list_watchlist(
             'price': price.price if price else None,
             'change_percent': price.change_percent if price else None,
         })
-    for entry in output:
+    for item in output:
         analysis_result = await session.execute(
             select(Analysis.stance, Analysis.overall_score)
-            .where(Analysis.symbol == entry['symbol'])
+            .where(Analysis.symbol == item['symbol'])
             .order_by(desc(Analysis.created_at))
             .limit(1)
         )
         row = analysis_result.one_or_none()
         if row:
-            entry['signal'] = row[0]
-            entry['confidence'] = round(float(row[1]) * 100, 1) if row[1] else None
+            item['signal'] = row[0]
+            item['confidence'] = round(float(row[1]) * 100, 1) if row[1] else None
         else:
-            entry['signal'] = None
-            entry['confidence'] = None
+            item['signal'] = None
+            item['confidence'] = None
     return output
 
 
