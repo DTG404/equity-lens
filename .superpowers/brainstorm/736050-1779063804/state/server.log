@@ -1,8 +1,0 @@
-{"type":"server-started","port":55372,"host":"0.0.0.0","url_host":"localhost","url":"http://localhost:55372","screen_dir":"/home/digitalghost/projects/equity-lens/.superpowers/brainstorm/736050-1779063804/content","state_dir":"/home/digitalghost/projects/equity-lens/.superpowers/brainstorm/736050-1779063804/state"}
-{"type":"screen-added","file":"/home/digitalghost/projects/equity-lens/.superpowers/brainstorm/736050-1779063804/content/design-vision.html"}
-{"type":"screen-added","file":"/home/digitalghost/projects/equity-lens/.superpowers/brainstorm/736050-1779063804/content/design-directions.html"}
-{"source":"user-event","type":"click","text":"A\n      \n        Cyberpunk Terminal\n        Phosphor green, 2×2 grid, monospace, command bar, Bloomberg-meets-Blade-Runner","choice":"a","id":null,"timestamp":1779063999687}
-{"type":"screen-added","file":"/home/digitalghost/projects/equity-lens/.superpowers/brainstorm/736050-1779063804/content/design-deep-dive-a.html"}
-{"type":"screen-added","file":"/home/digitalghost/projects/equity-lens/.superpowers/brainstorm/736050-1779063804/content/liquid-glass-direction.html"}
-{"type":"screen-added","file":"/home/digitalghost/projects/equity-lens/.superpowers/brainstorm/736050-1779063804/content/liquid-glass-futurist.html"}
-{"type":"server-stopped","reason":"idle timeout"}

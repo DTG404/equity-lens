@@ -41,3 +41,9 @@ docs/
 *.so
 *.dylib
 *.dll
+
+# Knowledge graph (auto-generated)
+graphify-out/
+
+# Brainstorm/design files (auto-generated)
+.superpowers/
