@@ -35,6 +35,18 @@ export default function ResearchPage({ params }: ResearchPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [symbol, setSymbol] = useState<string>('');
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState('3M');
+
+  const now = new Date();
+
+  const filterByPeriod = (history: ResearchData['price_history'], period: string) => {
+    if (period === 'ALL') return history;
+    const days = { '1D': 1, '1W': 7, '1M': 30, '3M': 90, '1Y': 365 }[period] ?? 90;
+    const cutoff = new Date(now.getTime() - days * 86400000);
+    return history.filter((h) => new Date(h.date).getTime() >= cutoff.getTime());
+  };
+
+  const periods = ['1D', '1W', '1M', '3M', '1Y', 'ALL'];
 
   const loadResearch = useCallback(async (forceRegenerate?: boolean) => {
     try {
@@ -56,7 +68,7 @@ export default function ResearchPage({ params }: ResearchPageProps) {
         const resolved = await params;
         const sym = resolved.symbol.toUpperCase();
         setSymbol(sym);
-        const research = await fetchResearch(sym);
+        const research = await fetchResearch(sym, true);
         if (!cancelled) setData(research);
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load research');
@@ -154,19 +166,24 @@ export default function ResearchPage({ params }: ResearchPageProps) {
                       Price Chart
                     </h2>
                     <div className="flex gap-1">
-                      {['1D', '1W', '1M', '3M', '1Y', 'ALL'].map((p) => (
-                        <span
+                      {periods.map((p) => (
+                        <button
                           key={p}
-                          className="rounded-md px-1.5 py-0.5 font-mono text-[0.55rem] text-white/30 transition-colors hover:text-white/60"
+                          onClick={() => setSelectedPeriod(p)}
+                          className={`rounded-md px-1.5 py-0.5 font-mono text-[0.55rem] transition-colors ${
+                            selectedPeriod === p
+                              ? 'bg-cyan-400/10 text-cyan-400'
+                              : 'text-white/30 hover:text-white/60'
+                          }`}
                         >
                           {p}
-                        </span>
+                        </button>
                       ))}
                     </div>
                   </div>
                   <div className="px-2 py-2">
                     <PriceChart
-                      data={data.price_history.map((h) => ({
+                      data={filterByPeriod(data.price_history, selectedPeriod).map((h) => ({
                         date: h.date,
                         open: h.open,
                         high: h.high,
