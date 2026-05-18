@@ -82,26 +82,32 @@ def _build_prompt(input_data: AnalysisInput) -> str:
 
 def generate_thesis(input_data: AnalysisInput) -> dict[str, Any]:
     """Generate investment thesis and scenarios using DeepSeek or fallback.
-
-    If DEEPSEEK_API_KEY is set and non-empty, calls the DeepSeek API.
-    Otherwise, or if the API call fails, returns a structured fallback.
+    Synchronous wrapper — uses anyio.run(). Prefer generate_thesis_async() in async contexts.
     """
     api_key = settings.deepseek_api_key
     if not api_key:
         return _build_fallback(input_data)
 
-
     prompt = _build_prompt(input_data)
 
     try:
         import anyio
-
-        response = anyio.run(
-            _call_deepseek_api,
-            api_key,
-            prompt,
-        )
+        response = anyio.run(_call_deepseek_api, api_key, prompt)
         return response
+    except Exception:
+        return _build_fallback(input_data)
+
+
+async def generate_thesis_async(input_data: AnalysisInput) -> dict[str, Any]:
+    """Async version of generate_thesis. Use this from async route handlers."""
+    api_key = settings.deepseek_api_key
+    if not api_key:
+        return _build_fallback(input_data)
+
+    prompt = _build_prompt(input_data)
+
+    try:
+        return await _call_deepseek_api(api_key, prompt)
     except Exception:
         return _build_fallback(input_data)
 

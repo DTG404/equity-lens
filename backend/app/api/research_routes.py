@@ -8,7 +8,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_session
-from app.core.deepseek import AnalysisInput, generate_thesis
+from app.core.deepseek import AnalysisInput, generate_thesis_async
 from app.domain.db_models import Analysis, NewsArticle, PriceHistory, PriceSnapshot, WatchlistEntry
 from app.domain.models import TickerSymbol
 from app.domain.scoring import compute_factor_scores
@@ -180,7 +180,7 @@ async def get_research(
         overall_score=overall,
         recent_news_titles=news_titles,
     )
-    thesis_result = generate_thesis(analysis_input)
+    thesis_result = await generate_thesis_async(analysis_input)
 
     # 6. Store analysis in DB
     analysis = Analysis(
