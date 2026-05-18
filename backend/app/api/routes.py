@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends
 
 from app.api.alert_routes import router as alert_router
+from app.api.backtest_routes import router as backtest_router
 from app.api.broker_routes import router as broker_router
+from app.api.finnhub_routes import router as finnhub_router
 from app.api.fundamentals_routes import router as fundamentals_router
 from app.api.holdings_routes import router as holdings_router
 from app.api.macro_routes import router as macro_router
@@ -42,6 +44,8 @@ router.include_router(settings_router)
 router.include_router(quote_router)
 router.include_router(news_router)
 router.include_router(alert_router)
+router.include_router(backtest_router)
+router.include_router(finnhub_router)
 router.include_router(fundamentals_router)
 router.include_router(signals_router)
 router.include_router(macro_router)
