@@ -10,6 +10,7 @@ from app.api.portfolio_routes import router as portfolio_router
 from app.api.quote_routes import router as quote_router
 from app.api.research_routes import router as research_router
 from app.api.screener_routes import router as screener_router
+from app.api.sec_routes import router as sec_router
 from app.api.settings_routes import router as settings_router
 from app.api.signals_routes import router as signals_router
 from app.api.technicals_routes import router as technicals_router
@@ -44,4 +45,5 @@ router.include_router(fundamentals_router)
 router.include_router(signals_router)
 router.include_router(macro_router)
 router.include_router(screener_router)
+router.include_router(sec_router, prefix='/sec')
 router.include_router(technicals_router)
