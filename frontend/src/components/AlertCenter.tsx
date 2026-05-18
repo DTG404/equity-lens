@@ -14,9 +14,9 @@ import {
 } from '@/lib/api';
 
 const severityColors: Record<string, string> = {
-  info: '#3b82f6',
-  warning: '#f59e0b',
-  critical: '#ef4444',
+  info: 'bg-blue-400',
+  warning: 'bg-amber-400',
+  critical: 'bg-red-400',
 };
 
 const alertTypeIcons: Record<string, string> = {
@@ -124,29 +124,13 @@ export default function AlertCenter() {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 12,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>Alerts</h3>
+      <div className="flex justify-between items-center mb-3">
+        <div className="flex items-center gap-2">
+          <h3 className="text-xs uppercase tracking-wider text-white/40 m-0 font-semibold">
+            Alerts
+          </h3>
           {unreadCount > 0 && (
-            <span
-              style={{
-                background: '#ef4444',
-                color: '#fff',
-                fontSize: 11,
-                fontWeight: 700,
-                padding: '2px 6px',
-                borderRadius: 10,
-                minWidth: 18,
-                textAlign: 'center',
-              }}
-            >
+            <span className="bg-red-500 text-white text-[0.6rem] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-none">
               {unreadCount}
             </span>
           )}
@@ -155,15 +139,7 @@ export default function AlertCenter() {
           <button
             type="button"
             onClick={handleMarkAllRead}
-            style={{
-              background: 'transparent',
-              border: '1px solid var(--border)',
-              borderRadius: 4,
-              padding: '4px 10px',
-              fontSize: 12,
-              cursor: 'pointer',
-              color: 'var(--text-secondary)',
-            }}
+            className="glass-badge-amber text-xs"
           >
             Mark all read
           </button>
@@ -171,67 +147,26 @@ export default function AlertCenter() {
       </div>
 
       {error && (
-        <p style={{ color: 'var(--accent-red)', fontSize: 13, marginBottom: 8 }}>
-          {error}
-        </p>
+        <p className="text-xs text-red-400 mb-2">{error}</p>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
+      <div className="flex flex-col gap-2 mb-3">
         {events.length === 0 ? (
-          <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-            No alerts yet.
-          </p>
+          <p className="text-xs text-white/25">No alerts yet.</p>
         ) : (
           events.slice(0, 5).map((event) => (
             <div
               key={event.id}
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 8,
-                padding: '8px 0',
-                borderBottom: '1px solid var(--border)',
-                opacity: event.read ? 0.6 : 1,
-              }}
+              className={`flex items-start gap-2 py-2 border-b border-white/[0.06] ${event.read ? 'opacity-50' : ''}`}
             >
               <span
-                style={{
-                  width: 22,
-                  height: 22,
-                  borderRadius: '50%',
-                  background: severityColors[event.severity] || '#6b7280',
-                  color: '#fff',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  marginTop: 2,
-                }}
-              >
-                {alertTypeIcons[event.alert_type] || '?'}
-              </span>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div
-                  style={{
-                    fontSize: 13,
-                    fontWeight: event.read ? 400 : 600,
-                    color: 'var(--text-primary)',
-                    wordBreak: 'break-word',
-                  }}
-                >
+                className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${severityColors[event.severity] || 'bg-gray-500'}`}
+              />
+              <div className="flex-1 min-w-0">
+                <div className="text-xs text-[#f0f6fc] break-words">
                   {event.message}
                 </div>
-                <div
-                  style={{
-                    fontSize: 11,
-                    color: 'var(--text-secondary)',
-                    marginTop: 2,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                  }}
-                >
+                <div className="flex justify-between text-white/30 text-[0.65rem] mt-0.5">
                   <span>
                     {event.symbol} · {event.severity}
                   </span>
@@ -242,29 +177,13 @@ export default function AlertCenter() {
                 <button
                   type="button"
                   onClick={() => handleMarkRead(event.id)}
-                  style={{
-                    background: 'transparent',
-                    border: '1px solid var(--border)',
-                    borderRadius: 4,
-                    padding: '2px 8px',
-                    fontSize: 11,
-                    cursor: 'pointer',
-                    color: 'var(--text-secondary)',
-                    flexShrink: 0,
-                  }}
+                  className="glass-badge-cyan text-[0.55rem] shrink-0"
                 >
                   Mark read
                 </button>
               )}
               {event.read && (
-                <span
-                  style={{
-                    fontSize: 11,
-                    color: 'var(--text-secondary)',
-                    flexShrink: 0,
-                    padding: '2px 8px',
-                  }}
-                >
+                <span className="text-white/40 text-[0.55rem] shrink-0 px-1 py-0.5">
                   read
                 </span>
               )}
@@ -276,16 +195,7 @@ export default function AlertCenter() {
       <button
         type="button"
         onClick={() => setShowAddRule((prev) => !prev)}
-        style={{
-          background: 'transparent',
-          border: '1px solid var(--border)',
-          borderRadius: 4,
-          padding: '6px 12px',
-          fontSize: 13,
-          cursor: 'pointer',
-          color: 'var(--text-secondary)',
-          marginBottom: showAddRule ? 8 : 0,
-        }}
+        className={`glass-badge-cyan text-xs ${showAddRule ? 'mb-2' : ''}`}
       >
         {showAddRule ? 'Cancel' : 'Add Rule'}
       </button>
@@ -293,43 +203,20 @@ export default function AlertCenter() {
       {showAddRule && (
         <form
           onSubmit={handleAddRule}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8,
-            padding: 12,
-            border: '1px solid var(--border)',
-            borderRadius: 6,
-            background: 'var(--bg-card)',
-          }}
+          className="flex flex-col gap-2 p-3 rounded-lg border border-white/[0.06] bg-white/[0.03]"
         >
           <input
             type="text"
             placeholder="Symbol"
             value={newSymbol}
             onChange={(e) => setNewSymbol(e.target.value)}
-            style={{
-              padding: '6px 10px',
-              borderRadius: 4,
-              border: '1px solid var(--border)',
-              background: 'var(--bg-secondary)',
-              color: 'var(--text-primary)',
-              fontSize: 13,
-            }}
+            className="rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-sm text-[#f0f6fc] placeholder-white/25 outline-none transition-colors focus:border-cyan-400/30"
           />
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className="flex gap-2">
             <select
               value={newAlertType}
               onChange={(e) => setNewAlertType(e.target.value)}
-              style={{
-                flex: 1,
-                padding: '6px 10px',
-                borderRadius: 4,
-                border: '1px solid var(--border)',
-                background: 'var(--bg-secondary)',
-                color: 'var(--text-primary)',
-                fontSize: 13,
-              }}
+              className="flex-1 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-sm text-[#f0f6fc] outline-none transition-colors focus:border-cyan-400/30"
             >
               <option value="price">price</option>
               <option value="news">news</option>
@@ -339,15 +226,7 @@ export default function AlertCenter() {
             <select
               value={newCondition}
               onChange={(e) => setNewCondition(e.target.value)}
-              style={{
-                flex: 1,
-                padding: '6px 10px',
-                borderRadius: 4,
-                border: '1px solid var(--border)',
-                background: 'var(--bg-secondary)',
-                color: 'var(--text-primary)',
-                fontSize: 13,
-              }}
+              className="flex-1 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-sm text-[#f0f6fc] outline-none transition-colors focus:border-cyan-400/30"
             >
               <option value="above">above</option>
               <option value="below">below</option>
@@ -358,27 +237,11 @@ export default function AlertCenter() {
             placeholder="Threshold"
             value={newThreshold}
             onChange={(e) => setNewThreshold(e.target.value)}
-            style={{
-              padding: '6px 10px',
-              borderRadius: 4,
-              border: '1px solid var(--border)',
-              background: 'var(--bg-secondary)',
-              color: 'var(--text-primary)',
-              fontSize: 13,
-            }}
+            className="rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-sm text-[#f0f6fc] placeholder-white/25 outline-none transition-colors focus:border-cyan-400/30"
           />
           <button
             type="submit"
-            style={{
-              padding: '6px 12px',
-              borderRadius: 4,
-              border: 'none',
-              background: 'var(--accent-blue, #3b82f6)',
-              color: '#fff',
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
+            className="glass-badge-cyan rounded-lg px-4 py-2 text-xs font-semibold uppercase tracking-wider"
           >
             Create Rule
           </button>
@@ -386,46 +249,23 @@ export default function AlertCenter() {
       )}
 
       {rules.length > 0 && (
-        <div style={{ marginTop: 12 }}>
-          <h4
-            style={{
-              fontSize: 13,
-              fontWeight: 600,
-              marginBottom: 8,
-              color: 'var(--text-secondary)',
-            }}
-          >
+        <div className="mt-3">
+          <h4 className="text-xs uppercase tracking-wider text-white/40 mb-2 font-semibold">
             Active Rules
           </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div className="flex flex-col gap-1.5">
             {rules.map((rule) => (
               <div
                 key={rule.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '6px 8px',
-                  borderRadius: 4,
-                  border: '1px solid var(--border)',
-                  background: 'var(--bg-card)',
-                }}
+                className="flex justify-between items-center px-2 py-1.5 rounded border border-white/[0.06] bg-white/[0.03]"
               >
-                <span style={{ fontSize: 12 }}>
+                <span className="text-xs font-mono text-white/60">
                   {rule.symbol} {rule.alert_type} {rule.condition} ${rule.threshold}
                 </span>
                 <button
                   type="button"
                   onClick={() => handleDeleteRule(rule.id)}
-                  style={{
-                    background: 'transparent',
-                    border: '1px solid var(--border)',
-                    borderRadius: 4,
-                    padding: '2px 8px',
-                    fontSize: 11,
-                    cursor: 'pointer',
-                    color: 'var(--text-secondary)',
-                  }}
+                  className="glass-badge-red text-[0.55rem]"
                 >
                   Delete
                 </button>
