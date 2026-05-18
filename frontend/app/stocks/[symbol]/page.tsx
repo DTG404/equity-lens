@@ -36,12 +36,12 @@ export default function ResearchPage({ params }: ResearchPageProps) {
   const [symbol, setSymbol] = useState<string>('');
   const [isRegenerating, setIsRegenerating] = useState(false);
 
-  const loadResearch = useCallback(async () => {
+  const loadResearch = useCallback(async (forceRegenerate?: boolean) => {
     try {
       const resolved = await params;
       const sym = resolved.symbol.toUpperCase();
       setSymbol(sym);
-      const research = await fetchResearch(sym);
+      const research = await fetchResearch(sym, forceRegenerate);
       setData(research);
       setError(null);
     } catch (err) {
@@ -68,7 +68,7 @@ export default function ResearchPage({ params }: ResearchPageProps) {
 
   const handleRegenerate = async () => {
     setIsRegenerating(true);
-    await loadResearch();
+    await loadResearch(true);
     setIsRegenerating(false);
   };
 

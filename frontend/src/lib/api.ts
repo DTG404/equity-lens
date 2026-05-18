@@ -140,8 +140,9 @@ export async function fetchNews(symbol?: string): Promise<NewsArticle[]> {
   return response.json() as Promise<NewsArticle[]>;
 }
 
-export async function fetchResearch(symbol: string): Promise<ResearchData> {
-  const response = await fetch(`${API_BASE}/api/research/${symbol}`);
+export async function fetchResearch(symbol: string, force?: boolean): Promise<ResearchData> {
+  const url = force ? `${API_BASE}/api/research/${symbol}?force=true` : `${API_BASE}/api/research/${symbol}`;
+  const response = await fetch(url);
   if (!response.ok) throw new Error('Failed to fetch research data');
   return response.json() as Promise<ResearchData>;
 }
