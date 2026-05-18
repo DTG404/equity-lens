@@ -96,11 +96,14 @@ async def delete_rule(
 @router.get('/events')
 async def list_events(
     session: AsyncSession = Depends(get_session),
+    skip: int = 0,
+    limit: int = 50,
 ) -> list[dict[str, object]]:
     result = await session.execute(
         select(AlertEvent)
         .order_by(AlertEvent.triggered_at.desc())
-        .limit(50)
+        .offset(skip)
+        .limit(limit)
     )
     events = result.scalars().all()
     return [

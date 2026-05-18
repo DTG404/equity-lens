@@ -5,6 +5,8 @@ export interface WatchlistItem {
   company_name: string;
   price: number | null;
   change_percent: number | null;
+  signal?: string | null;
+  confidence?: number | null;
 }
 
 export interface Quote {
@@ -345,4 +347,76 @@ export async function fetchMacro(): Promise<MacroData> {
   const response = await fetch(`${API_BASE}/api/macro`);
   if (!response.ok) throw new Error('Failed to fetch macro data');
   return response.json() as Promise<MacroData>;
+}
+
+/* ── Stock Screener ────────────────────────────────────────── */
+
+export interface ScreenerResult {
+  symbol: string;
+  name: string;
+  price: number;
+  change_percent: number;
+  volume: number;
+  sector: string;
+  market_cap: number | null;
+  pe_ratio: number | null;
+  rsi: number | null;
+}
+
+export interface ScreenerResponse {
+  total: number;
+  returned: number;
+  errors: number;
+  results: ScreenerResult[];
+}
+
+/* ── Portfolio Performance ─────────────────────────────────── */
+
+export interface PortfolioPosition {
+  symbol: string;
+  quantity: number;
+  avg_cost: number;
+  current_price: number;
+  cost_basis: number;
+  market_value: number;
+  pl: number;
+  pl_pct: number;
+}
+
+export interface PortfolioPerformance {
+  total_cost: number;
+  total_value: number;
+  total_pl: number;
+  total_pl_pct: number;
+  position_count: number;
+  positions: PortfolioPosition[];
+}
+
+export async function fetchPortfolioPerformance(): Promise<PortfolioPerformance> {
+  const response = await fetch(`${API_BASE}/api/portfolio/performance`);
+  if (!response.ok) throw new Error('Failed to fetch portfolio performance');
+  return response.json() as Promise<PortfolioPerformance>;
+}
+
+export async function fetchScreener(params?: {
+  priceMin?: number;
+  priceMax?: number;
+  sector?: string;
+  rsiMin?: number;
+  rsiMax?: number;
+  volumeMin?: number;
+  sortBy?: string;
+  sortDir?: string;
+  limit?: number;
+  skip?: number;
+}): Promise<ScreenerResponse> {
+  const query = new URLSearchParams();
+  if (params) {
+    Object.entries(params).forEach(([key, val]) => {
+      if (val !== undefined && val !== null) query.set(key, String(val));
+    });
+  }
+  const response = await fetch(`${API_BASE}/api/screener?${query}`);
+  if (!response.ok) throw new Error('Failed to fetch screener data');
+  return response.json() as Promise<ScreenerResponse>;
 }

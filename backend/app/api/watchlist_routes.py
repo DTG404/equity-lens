@@ -4,11 +4,11 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, field_validator
-from sqlalchemy import select
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_session
-from app.domain.db_models import CompanyInfo, PriceSnapshot, WatchlistEntry
+from app.domain.db_models import Analysis, CompanyInfo, PriceSnapshot, WatchlistEntry
 from app.domain.models import TickerSymbol
 from app.providers import get_market_data_provider
 
@@ -29,8 +29,15 @@ class WatchlistCreateRequest(BaseModel):
 @router.get('')
 async def list_watchlist(
     session: AsyncSession = Depends(get_session),
+    skip: int = 0,
+    limit: int = 50,
 ) -> list[dict[str, Any]]:
-    result = await session.execute(select(WatchlistEntry).order_by(WatchlistEntry.created_at))
+    result = await session.execute(
+        select(WatchlistEntry)
+        .order_by(WatchlistEntry.created_at)
+        .offset(skip)
+        .limit(limit)
+    )
     entries = result.scalars().all()
     output = []
     for entry in entries:
@@ -47,6 +54,20 @@ async def list_watchlist(
             'price': price.price if price else None,
             'change_percent': price.change_percent if price else None,
         })
+    for item in output:
+        analysis_result = await session.execute(
+            select(Analysis.stance, Analysis.overall_score)
+            .where(Analysis.symbol == item['symbol'])
+            .order_by(desc(Analysis.created_at))
+            .limit(1)
+        )
+        row = analysis_result.one_or_none()
+        if row:
+            item['signal'] = row[0]
+            item['confidence'] = round(float(row[1]) * 100, 1) if row[1] else None
+        else:
+            item['signal'] = None
+            item['confidence'] = None
     return output
 
 

@@ -1,5 +1,6 @@
 """Research aggregate endpoint for single-stock analysis page."""
 import json
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -23,6 +24,7 @@ def _get_provider() -> MarketDataProvider:
 @router.get('/{symbol}')
 async def get_research(
     symbol: str,
+    force: bool = False,
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, Any]:
     sym = symbol.upper()
@@ -96,6 +98,47 @@ async def get_research(
         for a in news_result.scalars().all()
     ]
 
+    # Cache: return existing analysis created within the last hour
+    one_hour_ago = datetime.now(UTC) - timedelta(hours=1)
+    existing = await session.execute(
+        select(Analysis)
+        .where(Analysis.symbol == sym)
+        .order_by(Analysis.created_at.desc())
+        .limit(1)
+    )
+    recent = existing.scalar_one_or_none()
+
+    risks = (
+        'Key risks include sector headwinds, macroeconomic uncertainty, '
+        'and company-specific execution risk.'
+    )
+
+    if recent and recent.created_at > one_hour_ago and not force:
+        cached_scores = {
+            'technical': {'score': recent.technical_score, 'explanation': ''},
+            'news_sentiment': {'score': recent.news_sentiment_score, 'explanation': ''},
+            'fundamentals': {'score': recent.fundamental_score, 'explanation': ''},
+            'macro': {'score': recent.macro_score, 'explanation': ''},
+            'overall': recent.overall_score,
+        }
+        return {
+            'symbol': recent.symbol,
+            'quote': quote,
+            'price_history': price_history,
+            'news': news_items,
+            'scores': cached_scores,
+            'thesis': recent.thesis,
+            'risks': risks,
+            'scenarios': {
+                'bull_case': recent.bull_case,
+                'base_case': recent.base_case,
+                'bear_case': recent.bear_case,
+                'model': recent.model_used,
+            },
+            'analysis_id': recent.id,
+            'analysis_created_at': recent.created_at.isoformat(),
+        }
+
     # 4. Compute scores from real data
     price_change_pct: float | None = None
     raw_change = quote.get('change_percent')
@@ -163,11 +206,6 @@ async def get_research(
     await session.flush()
     analysis_id = analysis.id
 
-    risks = (
-        "Key risks include sector headwinds, macroeconomic uncertainty, "
-        "and company-specific execution risk."
-    )
-
     return {
         'symbol': sym,
         'quote': quote,
@@ -183,4 +221,5 @@ async def get_research(
             'model': thesis_result.get('model', 'fallback'),
         },
         'analysis_id': analysis_id,
+        'analysis_created_at': analysis.created_at.isoformat(),
     }

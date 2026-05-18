@@ -13,6 +13,18 @@ Local-first stock market research terminal.
 - Dependency audit: `cd frontend && npm audit --audit-level=high`
 - Secrets scan: `gitleaks detect --source . --no-git`
 
+## Ticket Workflow (HARD RULE — NO EXCEPTIONS)
+
+1. **In Progress** — move ticket when starting work
+2. **Local checks BEFORE any commit/PR:**
+   - `cd backend && uv run ruff check app tests && uv run mypy app && uv run pytest -x -q`
+   - `cd frontend && npx tsc --noEmit && npm test && npm run build`
+   - ALL must pass before pushing
+3. **Resolution comment** — post to ticket after implementation
+4. **Create PR** — branch with changes, wait for CI green
+5. **In Review** — move ticket only when PR is green and ready
+6. **Done** — only after user confirms
+
 ## Database Migrations
 
 - Create migration: `cd backend && uv run alembic revision --autogenerate -m "description"`
