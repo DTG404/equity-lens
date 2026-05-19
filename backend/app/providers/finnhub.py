@@ -128,12 +128,18 @@ async def fetch_earnings_calendar() -> list[dict[str, Any]]:
 
 async def get_analyst_ratings(symbol: str) -> dict[str, Any]:
     """Fetch analyst ratings from Finnhub."""
-    url = f'{BASE_URL}/stock/recommendation'
-    params = {'symbol': symbol, 'token': settings.finnhub_api_key}
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url, params=params, timeout=10)
-        response.raise_for_status()
-        data = response.json()
+    if not settings.finnhub_api_key:
+        return {'error': 'Finnhub API key not configured'}
+
+    try:
+        url = f'{BASE_URL}/stock/recommendation'
+        params = {'symbol': symbol, 'token': settings.finnhub_api_key}
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, params=params, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+    except Exception:
+        return {'error': 'Failed to fetch analyst data'}
 
     if not data:
         return {'error': 'No analyst data available'}
