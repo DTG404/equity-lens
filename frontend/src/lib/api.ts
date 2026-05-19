@@ -399,6 +399,52 @@ export async function fetchPortfolioPerformance(): Promise<PortfolioPerformance>
   return response.json() as Promise<PortfolioPerformance>;
 }
 
+/* ── Portfolio Analytics ───────────────────────────────────── */
+
+export interface AllocationItem {
+  symbol: string;
+  quantity: number;
+  avg_cost: number;
+  current_price: number;
+  market_value: number;
+  pct: number;
+  sector: string;
+}
+
+export interface SectorAllocation {
+  sector: string;
+  market_value: number;
+  pct: number;
+}
+
+export interface PortfolioAnalytics {
+  allocation: {
+    by_ticker: AllocationItem[];
+    by_sector: SectorAllocation[];
+    total_value: number;
+  };
+  value_history: { date: string; value: number }[];
+  benchmark: null;
+}
+
+export async function fetchPortfolioAnalytics(): Promise<PortfolioAnalytics> {
+  const response = await fetch(`${API_BASE}/api/portfolio/analytics`);
+  if (!response.ok) throw new Error('Failed to fetch portfolio analytics');
+  return response.json() as Promise<PortfolioAnalytics>;
+}
+
+export interface ExplainData {
+  explanation: string;
+  key_takeaways: string[];
+  questions_to_ask: string[];
+}
+
+export async function fetchExplanation(symbol: string): Promise<ExplainData> {
+  const response = await fetch(`${API_BASE}/api/research/${symbol}/explain`, { method: 'POST' });
+  if (!response.ok) throw new Error('Failed to fetch explanation');
+  return response.json() as Promise<ExplainData>;
+}
+
 export async function fetchScreener(params?: {
   priceMin?: number;
   priceMax?: number;
