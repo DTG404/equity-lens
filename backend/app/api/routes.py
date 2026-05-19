@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends
 from app.api.alert_routes import router as alert_router
 from app.api.backtest_routes import router as backtest_router
 from app.api.broker_routes import router as broker_router
-from app.api.compare_routes import peers_router, router as compare_router
+from app.api.compare_routes import peers_router
+from app.api.compare_routes import router as compare_router
 from app.api.csv_routes import router as csv_router
 from app.api.dcf_routes import router as dcf_router
 from app.api.finnhub_routes import router as finnhub_router
