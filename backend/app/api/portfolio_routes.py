@@ -88,6 +88,7 @@ async def get_portfolio_analytics(
     symbols = [h.symbol for h in holdings]
     total_value = 0.0
     position_values: dict[str, float] = {}
+    current_prices: dict[str, float] = {}
 
     for h in holdings:
         price_result = await session.execute(
@@ -101,11 +102,45 @@ async def get_portfolio_analytics(
         value = h.quantity * current_price
         total_value += value
         position_values[h.symbol] = value
+        current_prices[h.symbol] = current_price
 
-    allocation = {}
+    by_ticker: list[dict[str, Any]] = []
+    by_sector_map: dict[str, float] = {}
     for h in holdings:
         val = position_values.get(h.symbol, 0)
-        allocation[h.symbol] = round((val / total_value * 100) if total_value > 0 else 0, 2)
+        pct = round((val / total_value * 100) if total_value > 0 else 0, 2)
+        sector = 'Unknown'
+        try:
+            from app.domain.db_models import CompanyInfo
+            ci_result = await session.execute(
+                select(CompanyInfo).where(CompanyInfo.symbol == h.symbol)
+            )
+            ci = ci_result.scalar_one_or_none()
+            if ci and ci.sector:
+                sector = ci.sector
+        except Exception:
+            pass
+        by_ticker.append({
+            'symbol': h.symbol,
+            'quantity': h.quantity,
+            'avg_cost': h.average_cost,
+            'current_price': current_prices.get(h.symbol, 0),
+            'market_value': round(val, 2),
+            'pct': pct,
+            'sector': sector,
+        })
+        by_sector_map[sector] = by_sector_map.get(sector, 0) + val
+
+    by_sector = [
+        {'sector': s, 'market_value': round(v, 2), 'pct': round((v / total_value * 100), 1) if total_value > 0 else 0}
+        for s, v in sorted(by_sector_map.items(), key=lambda x: x[1], reverse=True)
+    ]
+
+    allocation = {
+        'by_ticker': by_ticker,
+        'by_sector': by_sector,
+        'total_value': round(total_value, 2),
+    }
 
     # Build value history from daily price data
     value_history: list[dict[str, Any]] = []

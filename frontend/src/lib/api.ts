@@ -466,6 +466,22 @@ export async function fetchPortfolioPerformance(): Promise<PortfolioPerformance>
   return response.json() as Promise<PortfolioPerformance>;
 }
 
+export interface AllocationItem {
+  symbol: string;
+  quantity: number;
+  avg_cost: number;
+  current_price: number;
+  market_value: number;
+  pct: number;
+  sector: string;
+}
+
+export interface SectorAllocation {
+  sector: string;
+  market_value: number;
+  pct: number;
+}
+
 export interface RiskMetrics {
   sharpe_ratio: number | null;
   max_drawdown_pct: number | null;
@@ -475,6 +491,13 @@ export interface RiskMetrics {
 }
 
 export interface PortfolioAnalytics {
+  allocation: {
+    by_ticker: AllocationItem[];
+    by_sector: SectorAllocation[];
+    total_value: number;
+  };
+  value_history: { date: string; value: number }[];
+  benchmark: null;
   risk_metrics: RiskMetrics | null;
 }
 
