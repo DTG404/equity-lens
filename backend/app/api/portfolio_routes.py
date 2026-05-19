@@ -1,6 +1,5 @@
-"""Portfolio performance tracking and analytics endpoints."""
+"""Portfolio performance tracking endpoint."""
 
-from datetime import date
 from typing import Any
 
 from fastapi import APIRouter, Depends
@@ -8,7 +7,7 @@ from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_session
-from app.domain.db_models import CompanyInfo, Holding, PriceHistory, PriceSnapshot
+from app.domain.db_models import Holding, PriceHistory, PriceSnapshot
 
 router = APIRouter(prefix='/portfolio', tags=['portfolio'])
 
@@ -75,109 +74,155 @@ async def get_portfolio_performance(
 async def get_portfolio_analytics(
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, Any]:
-    """Calculate portfolio allocation and estimate value history."""
+    """Compute portfolio analytics including allocation, value history, and risk metrics."""
     result = await session.execute(select(Holding))
     holdings = result.scalars().all()
 
     if not holdings:
         return {
-            'allocation': {
-                'by_ticker': [],
-                'by_sector': [],
-                'total_value': 0.0,
-            },
+            'allocation': {},
             'value_history': [],
-            'benchmark': None,
+            'risk_metrics': None,
         }
 
     symbols = [h.symbol for h in holdings]
-
-    price_result = await session.execute(
-        select(PriceSnapshot)
-        .where(PriceSnapshot.symbol.in_(symbols))
-        .order_by(PriceSnapshot.symbol, PriceSnapshot.recorded_at.desc())
-    )
-    latest_prices: dict[str, float] = {}
-    for snap in price_result.scalars().all():
-        if snap.symbol not in latest_prices:
-            latest_prices[snap.symbol] = snap.price
-
-    company_result = await session.execute(
-        select(CompanyInfo).where(CompanyInfo.symbol.in_(symbols))
-    )
-    companies = {ci.symbol: ci for ci in company_result.scalars().all()}
-
     total_value = 0.0
-    tickers: list[dict[str, Any]] = []
-    sector_values: dict[str, float] = {}
-    holding_map: dict[str, float] = {}
+    position_values: dict[str, float] = {}
+    current_prices: dict[str, float] = {}
 
     for h in holdings:
-        current_price = latest_prices.get(h.symbol, h.average_cost)
-        market_value = h.quantity * current_price
-        total_value += market_value
-        holding_map[h.symbol] = h.quantity
+        price_result = await session.execute(
+            select(PriceSnapshot)
+            .where(PriceSnapshot.symbol == h.symbol)
+            .order_by(desc(PriceSnapshot.recorded_at))
+            .limit(1),
+        )
+        snap = price_result.scalar_one_or_none()
+        current_price = snap.price if snap else h.average_cost
+        value = h.quantity * current_price
+        total_value += value
+        position_values[h.symbol] = value
+        current_prices[h.symbol] = current_price
 
-        ci = companies.get(h.symbol)
-        sector = ci.sector if (ci and ci.sector) else 'Unknown'
-
-        tickers.append({
+    by_ticker: list[dict[str, Any]] = []
+    by_sector_map: dict[str, float] = {}
+    for h in holdings:
+        val = position_values.get(h.symbol, 0)
+        pct = round((val / total_value * 100) if total_value > 0 else 0, 2)
+        sector = 'Unknown'
+        try:
+            from app.domain.db_models import CompanyInfo
+            ci_result = await session.execute(
+                select(CompanyInfo).where(CompanyInfo.symbol == h.symbol)
+            )
+            ci = ci_result.scalar_one_or_none()
+            if ci and ci.sector:
+                sector = ci.sector
+        except Exception:
+            pass
+        by_ticker.append({
             'symbol': h.symbol,
             'quantity': h.quantity,
-            'avg_cost': round(h.average_cost, 2),
-            'market_value': round(market_value, 2),
-            'pct': 0.0,
+            'avg_cost': h.average_cost,
+            'current_price': current_prices.get(h.symbol, 0),
+            'market_value': round(val, 2),
+            'pct': pct,
             'sector': sector,
         })
-        sector_values[sector] = sector_values.get(sector, 0.0) + market_value
-
-    for t in tickers:
-        t['pct'] = round((t['market_value'] / total_value * 100), 2) if total_value else 0.0
+        by_sector_map[sector] = by_sector_map.get(sector, 0) + val
 
     by_sector = [
-        {
-            'sector': sector,
-            'market_value': round(value, 2),
-            'pct': round((value / total_value * 100), 2) if total_value else 0.0,
-        }
-        for sector, value in sorted(sector_values.items(), key=lambda x: x[1], reverse=True)
+        {'sector': s, 'market_value': round(v, 2), 'pct': round((v / total_value * 100), 1) if total_value > 0 else 0}
+        for s, v in sorted(by_sector_map.items(), key=lambda x: x[1], reverse=True)
     ]
 
+    allocation = {
+        'by_ticker': by_ticker,
+        'by_sector': by_sector,
+        'total_value': round(total_value, 2),
+    }
+
+    # Build value history from daily price data
     value_history: list[dict[str, Any]] = []
+    price_data: dict[str, dict[str, float]] = {}
+    for symbol in symbols:
+        ph_result = await session.execute(
+            select(PriceHistory)
+            .where(PriceHistory.symbol == symbol)
+            .order_by(PriceHistory.date),
+        )
+        records = ph_result.scalars().all()
+        price_data[symbol] = {str(r.date).split()[0]: r.close_price for r in records}
 
-    price_history_result = await session.execute(
-        select(PriceHistory)
-        .where(PriceHistory.symbol.in_(symbols))
-        .order_by(PriceHistory.date)
-    )
-    ph_rows = price_history_result.scalars().all()
+    all_dates: set[str] = set()
+    for data in price_data.values():
+        all_dates.update(data.keys())
 
-    if ph_rows:
-        date_prices: dict[date, dict[str, float]] = {}
-        for ph in ph_rows:
-            d = ph.date.date() if hasattr(ph.date, 'date') else ph.date
-            if d not in date_prices:
-                date_prices[d] = {}
-            date_prices[d][ph.symbol] = ph.close_price
+    for date_str in sorted(all_dates):
+        total = 0.0
+        has_all = True
+        for h in holdings:
+            close = price_data.get(h.symbol, {}).get(date_str)
+            if close is not None:
+                total += h.quantity * close
+            else:
+                has_all = False
+                break
+        if has_all and total > 0:
+            value_history.append({'date': date_str, 'value': round(total, 2)})
 
-        for d in sorted(date_prices):
-            portfolio_value = 0.0
-            for symbol, qty in holding_map.items():
-                close_price = date_prices[d].get(symbol)
-                if close_price is not None:
-                    portfolio_value += qty * close_price
-            if portfolio_value > 0:
-                value_history.append({
-                    'date': d.isoformat(),
-                    'value': round(portfolio_value, 2),
-                })
+    # Default risk metrics (overridden when enough price history exists)
+    risk_metrics = {
+        'sharpe_ratio': 0.0,
+        'max_drawdown_pct': 0.0,
+        'volatility_annualized_pct': 0.0,
+        'beta': 0.0,
+        'alpha_pct': 0.0,
+    }
+
+    if len(value_history) >= 5:
+        import math
+
+        values = [v['value'] for v in value_history]
+        daily_returns: list[float] = []
+        for i in range(1, len(values)):
+            if values[i - 1] > 0:
+                daily_returns.append((values[i] - values[i - 1]) / values[i - 1])
+
+        if daily_returns:
+            import statistics
+
+            avg_daily_return = statistics.mean(daily_returns)
+            daily_volatility = statistics.stdev(daily_returns) if len(daily_returns) > 1 else 0
+
+            risk_free_rate = 0.045
+            daily_rfr = risk_free_rate / 252
+            if daily_volatility > 0:
+                sharpe = (avg_daily_return - daily_rfr) / daily_volatility * math.sqrt(252)
+            else:
+                sharpe = 0.0
+
+            peak = values[0]
+            max_dd = 0.0
+            for v in values:
+                if v > peak:
+                    peak = v
+                dd = (peak - v) / peak
+                if dd > max_dd:
+                    max_dd = dd
+
+            ann_vol = daily_volatility * math.sqrt(252)
+
+            risk_metrics = {
+                'sharpe_ratio': round(sharpe, 2),
+                'max_drawdown_pct': round(-max_dd * 100, 2),
+                'volatility_annualized_pct': round(ann_vol * 100, 2),
+                'beta': 0.0,
+                'alpha_pct': 0.0,
+            }
 
     return {
-        'allocation': {
-            'by_ticker': tickers,
-            'by_sector': by_sector,
-            'total_value': round(total_value, 2),
-        },
+        'allocation': allocation,
         'value_history': value_history,
-        'benchmark': None,
+        'risk_metrics': risk_metrics,
     }

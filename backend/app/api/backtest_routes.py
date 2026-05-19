@@ -1,4 +1,4 @@
-"""Signal backtesting endpoint."""
+"""Backtesting endpoints."""
 
 from typing import Any
 
@@ -7,9 +7,68 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_session
-from app.domain.db_models import SignalOutcome
+from app.domain.backtest import run_backtest
+from app.domain.db_models import PriceHistory, SignalOutcome
 
 router = APIRouter(prefix='/backtest', tags=['backtest'])
+
+
+@router.post('/run')
+async def run_backtest_endpoint(
+    body: dict[str, Any],
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
+    """Run a strategy backtest against historical price data."""
+    strategy = body.get('strategy', {})
+    tickers = strategy.get('tickers', [])
+    entry_conds = strategy.get('entry_conditions', [])
+    exit_conds = strategy.get('exit_conditions', [])
+
+    if not tickers:
+        return {'error': 'No tickers provided'}
+
+    results: list[dict[str, Any]] = []
+    for symbol in tickers:
+        result = await session.execute(
+            select(PriceHistory)
+            .where(PriceHistory.symbol == symbol)
+            .order_by(PriceHistory.date)
+        )
+        rows = result.scalars().all()
+
+        if not rows:
+            results.append({'symbol': symbol, 'error': 'No price history', 'trades': 0})
+            continue
+
+        prices = [
+            {
+                'close': r.close_price,
+                'high': r.high_price,
+                'low': r.low_price,
+                'open': r.open_price,
+                'volume': r.volume,
+                'date': str(r.date),
+            }
+            for r in rows
+        ]
+
+        bt_result = run_backtest(prices, entry_conds, exit_conds, symbol)
+        results.append(bt_result)
+
+    total_trades = sum(r.get('trades', 0) for r in results)
+    total_return = sum(r.get('total_return_pct', 0) for r in results)
+    total_bh = sum(r.get('buy_hold_return_pct', 0) for r in results)
+    win_trades = sum(r.get('trades', 0) * r.get('win_rate', 0) for r in results)
+
+    return {
+        'strategy_name': strategy.get('name', 'Backtest'),
+        'tickers': tickers,
+        'total_trades': total_trades,
+        'overall_return_pct': round(total_return, 2),
+        'buy_hold_return_pct': round(total_bh, 2),
+        'win_rate': round(win_trades / total_trades, 3) if total_trades > 0 else 0,
+        'results': results,
+    }
 
 
 @router.get('/signals')

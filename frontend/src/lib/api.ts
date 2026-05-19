@@ -297,6 +297,27 @@ export async function fetchFundamentals(symbol: string): Promise<FundamentalsDat
   return response.json() as Promise<FundamentalsData>;
 }
 
+/* ── Chart Patterns ─────────────────────────────────────────── */
+
+export interface DetectedPattern {
+  type: string;
+  direction: string;
+  confidence: number;
+  detected_at: string;
+  target_price: number;
+}
+
+export interface PatternData {
+  symbol: string;
+  patterns: DetectedPattern[];
+}
+
+export async function fetchPatterns(symbol: string): Promise<PatternData> {
+  const response = await fetch(`${API_BASE}/api/technicals/${symbol}/patterns`, { method: 'POST' });
+  if (!response.ok) throw new Error('Failed to fetch patterns');
+  return response.json() as Promise<PatternData>;
+}
+
 /* ── Technical Indicators (TA-Lib) ─────────────────────────── */
 
 export interface TechnicalsData {
@@ -350,6 +371,52 @@ export async function fetchMacro(): Promise<MacroData> {
   return response.json() as Promise<MacroData>;
 }
 
+export interface MarketIndex {
+  symbol: string;
+  name: string;
+  price: number;
+  change_pct: number;
+}
+
+export interface MarketBreadth {
+  advancers: number;
+  decliners: number;
+  advance_decline_ratio: number;
+  new_highs: number;
+  new_lows: number;
+}
+
+export interface MarketsOverview {
+  indices: MarketIndex[];
+  breadth: MarketBreadth | null;
+  commodities: MarketIndex[];
+  global: MarketIndex[];
+}
+
+export async function fetchMarketsOverview(): Promise<MarketsOverview> {
+  const response = await fetch(`${API_BASE}/api/markets/overview`);
+  if (!response.ok) throw new Error('Failed to fetch markets overview');
+  return response.json() as Promise<MarketsOverview>;
+}
+
+/* ── Analyst Consensus (Finnhub) ─────────────────────────── */
+
+export interface AnalystRatings {
+  total_analysts: number;
+  ratings: { buy: number; hold: number; sell: number };
+  consensus: string;
+  period: string;
+  average_target?: number;
+  high_target?: number;
+  low_target?: number;
+}
+
+export async function fetchAnalystConsensus(symbol: string): Promise<AnalystRatings> {
+  const response = await fetch(`${API_BASE}/api/finnhub/analysts/${symbol}`);
+  if (!response.ok) throw new Error('Failed to fetch analyst consensus');
+  return response.json() as Promise<AnalystRatings>;
+}
+
 /* ── Stock Screener ────────────────────────────────────────── */
 
 export interface ScreenerResult {
@@ -399,8 +466,6 @@ export async function fetchPortfolioPerformance(): Promise<PortfolioPerformance>
   return response.json() as Promise<PortfolioPerformance>;
 }
 
-/* ── Portfolio Analytics ───────────────────────────────────── */
-
 export interface AllocationItem {
   symbol: string;
   quantity: number;
@@ -417,6 +482,14 @@ export interface SectorAllocation {
   pct: number;
 }
 
+export interface RiskMetrics {
+  sharpe_ratio: number | null;
+  max_drawdown_pct: number | null;
+  volatility_annualized_pct: number | null;
+  beta: number | null;
+  alpha_pct: number | null;
+}
+
 export interface PortfolioAnalytics {
   allocation: {
     by_ticker: AllocationItem[];
@@ -425,24 +498,13 @@ export interface PortfolioAnalytics {
   };
   value_history: { date: string; value: number }[];
   benchmark: null;
+  risk_metrics: RiskMetrics | null;
 }
 
 export async function fetchPortfolioAnalytics(): Promise<PortfolioAnalytics> {
   const response = await fetch(`${API_BASE}/api/portfolio/analytics`);
   if (!response.ok) throw new Error('Failed to fetch portfolio analytics');
   return response.json() as Promise<PortfolioAnalytics>;
-}
-
-export interface ExplainData {
-  explanation: string;
-  key_takeaways: string[];
-  questions_to_ask: string[];
-}
-
-export async function fetchExplanation(symbol: string): Promise<ExplainData> {
-  const response = await fetch(`${API_BASE}/api/research/${symbol}/explain`, { method: 'POST' });
-  if (!response.ok) throw new Error('Failed to fetch explanation');
-  return response.json() as Promise<ExplainData>;
 }
 
 export async function fetchScreener(params?: {
@@ -466,4 +528,72 @@ export async function fetchScreener(params?: {
   const response = await fetch(`${API_BASE}/api/screener?${query}`);
   if (!response.ok) throw new Error('Failed to fetch screener data');
   return response.json() as Promise<ScreenerResponse>;
+}
+
+/* ── Peer Comparison ───────────────────────────────────────── */
+
+export interface PeerMetric {
+  symbol: string;
+  name: string;
+  market_cap: number;
+  pe_ratio: number;
+  revenue_growth: number;
+  profit_margin: number;
+  ytd_return: number;
+}
+
+export interface PeerData {
+  symbol: string;
+  sector: string;
+  peers: PeerMetric[];
+  symbol_metrics: Record<string, number>;
+  percentiles: Record<string, number>;
+}
+
+export async function fetchPeers(symbol: string): Promise<PeerData> {
+  const response = await fetch(`${API_BASE}/api/peers/${symbol}`);
+  if (!response.ok) throw new Error('Failed to fetch peers');
+  return response.json() as Promise<PeerData>;
+}
+
+/* ── Backtesting ─────────────────────────────────────────── */
+
+export interface BacktestTrade {
+  symbol: string;
+  entry_date: string;
+  exit_date: string;
+  entry_price: number;
+  exit_price: number;
+  return_pct: number;
+  bars_held: number;
+}
+
+export interface TickerResult {
+  symbol: string;
+  trades: number;
+  win_rate: number;
+  total_return_pct: number;
+  buy_hold_return_pct: number;
+  max_drawdown_pct: number;
+  trades_list?: BacktestTrade[];
+}
+
+export interface BacktestResult {
+  strategy_name: string;
+  tickers: string[];
+  total_trades: number;
+  overall_return_pct: number;
+  buy_hold_return_pct: number;
+  win_rate: number;
+  results: TickerResult[];
+}
+
+export async function runBacktest(strategy: object): Promise<BacktestResult> {
+  const response = await fetch(`${API_BASE}/api/backtest/run`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ strategy }),
+  });
+  if (!response.ok) throw new Error('Backtest failed');
+  return response.json() as Promise<BacktestResult>;
 }

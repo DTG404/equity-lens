@@ -4,16 +4,18 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import NavBar from '@/components/NavBar';
 import StatusBar from '@/components/StatusBar';
-import AllocationChart from '@/components/AllocationChart';
-import PortfolioValueChart from '@/components/PortfolioValueChart';
-import { fetchPortfolioPerformance, type PortfolioPerformance } from '@/lib/api';
-import { fetchPortfolioAnalytics, type PortfolioAnalytics } from '@/lib/api';
+import {
+  fetchPortfolioPerformance,
+  fetchPortfolioAnalytics,
+  type PortfolioPerformance,
+  type PortfolioAnalytics,
+} from '@/lib/api';
+import RiskMetricCard from '@/components/RiskMetricCard';
 
 export default function PortfolioPage() {
   const [data, setData] = useState<PortfolioPerformance | null>(null);
-  const [analytics, setAnalytics] = useState<PortfolioAnalytics | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<PortfolioAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
-  const [analyticsLoading, setAnalyticsLoading] = useState(true);
 
   useEffect(() => {
     fetchPortfolioPerformance()
@@ -22,9 +24,8 @@ export default function PortfolioPage() {
       .finally(() => setLoading(false));
 
     fetchPortfolioAnalytics()
-      .then(setAnalytics)
-      .catch(console.error)
-      .finally(() => setAnalyticsLoading(false));
+      .then(setAnalyticsData)
+      .catch(console.error);
   }, []);
 
   return (
@@ -34,7 +35,6 @@ export default function PortfolioPage() {
       <NavBar />
 
       <main className="relative z-10 mx-3 my-3 flex-1">
-        {/* Performance Panel */}
         <div className="glass-panel mb-3 overflow-hidden">
           <div className="border-b border-white/[0.04] px-4 py-3">
             <h1 className="text-xs font-semibold uppercase tracking-wider text-white/40">
@@ -118,30 +118,7 @@ export default function PortfolioPage() {
           )}
         </div>
 
-        {/* Analytics Grid */}
-        {analyticsLoading ? (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <div className="h-[320px] animate-pulse rounded-2xl bg-white/[0.03]" />
-            <div className="h-[320px] animate-pulse rounded-2xl bg-white/[0.03]" />
-          </div>
-        ) : analytics ? (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <AllocationChart
-              sectors={analytics.allocation.by_sector}
-              totalValue={analytics.allocation.total_value}
-            />
-            <PortfolioValueChart data={analytics.value_history} />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <div className="glass-panel flex h-[320px] items-center justify-center">
-              <span className="text-sm text-red-400">Failed to load analytics</span>
-            </div>
-            <div className="glass-panel flex h-[320px] items-center justify-center">
-              <span className="text-sm text-red-400">Failed to load analytics</span>
-            </div>
-          </div>
-        )}
+        <RiskMetricCard metrics={analyticsData?.risk_metrics ?? null} />
       </main>
 
       <StatusBar />
