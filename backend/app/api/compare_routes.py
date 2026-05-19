@@ -10,6 +10,7 @@ from app.providers import get_market_data_provider
 from app.providers.screener import UNIVERSE
 
 router = APIRouter(prefix='/compare', tags=['compare'])
+peers_router = APIRouter(prefix='/peers', tags=['peers'])
 
 MAX_TICKERS = 5
 
@@ -93,7 +94,7 @@ async def compare_tickers(
     }
 
 
-@router.get('/peers/{symbol}')
+@peers_router.get('/{symbol}')
 async def get_peers(symbol: str) -> dict[str, Any]:
     """Return peer comparison data for a symbol."""
     sym = symbol.upper()
