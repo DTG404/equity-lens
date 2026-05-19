@@ -9,6 +9,7 @@ const navItems = [
   { label: 'Research', href: '/research', shortcut: '⌘2' },
   { label: 'Screener', href: '/screener', shortcut: '⌘3' },
   { label: 'Signals', href: '/signals', shortcut: '⌘4' },
+  { label: 'Backtest', href: '/backtest', shortcut: '⌘6' },
   { label: 'Portfolio', href: '/portfolio', shortcut: '⌘5' },
 ];
 

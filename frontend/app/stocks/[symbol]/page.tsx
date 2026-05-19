@@ -8,6 +8,9 @@ import FactorScoreCard from '@/components/FactorScoreCard';
 import ScenarioCard from '@/components/ScenarioCard';
 import SignalHistory from '@/components/SignalHistory';
 import { FundamentalsPanel, TechnicalsPanel } from '@/components/ResearchPanels';
+import AnalystConsensus from '@/components/AnalystConsensus';
+import PeerComparisonPanel from '@/components/PeerComparisonPanel';
+import PatternPanel from '@/components/PatternPanel';
 import NavBar from '@/components/NavBar';
 import StatusBar from '@/components/StatusBar';
 
@@ -198,6 +201,9 @@ export default function ResearchPage({ params }: ResearchPageProps) {
 
               <div>
                 <FactorScoreCard scores={data.scores} />
+                <div className="mt-3">
+                  <PatternPanel symbol={symbol} />
+                </div>
               </div>
             </div>
 
@@ -300,6 +306,17 @@ export default function ResearchPage({ params }: ResearchPageProps) {
                 Signal History
               </div>
               <SignalHistory symbol={symbol} />
+            </div>
+          </>
+        )}
+
+        {symbol && (
+          <>
+            <div className="mb-3">
+              <PeerComparisonPanel symbol={symbol} />
+            </div>
+            <div className="mb-3">
+              <AnalystConsensus symbol={symbol} />
             </div>
           </>
         )}

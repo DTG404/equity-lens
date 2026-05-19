@@ -4,10 +4,17 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import NavBar from '@/components/NavBar';
 import StatusBar from '@/components/StatusBar';
-import { fetchPortfolioPerformance, type PortfolioPerformance } from '@/lib/api';
+import {
+  fetchPortfolioPerformance,
+  fetchPortfolioAnalytics,
+  type PortfolioPerformance,
+  type PortfolioAnalytics,
+} from '@/lib/api';
+import RiskMetricCard from '@/components/RiskMetricCard';
 
 export default function PortfolioPage() {
   const [data, setData] = useState<PortfolioPerformance | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<PortfolioAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,6 +22,10 @@ export default function PortfolioPage() {
       .then(setData)
       .catch(console.error)
       .finally(() => setLoading(false));
+
+    fetchPortfolioAnalytics()
+      .then(setAnalyticsData)
+      .catch(console.error);
   }, []);
 
   return (
@@ -106,6 +117,8 @@ export default function PortfolioPage() {
             <div className="px-4 py-8 text-center text-xs text-red-400">Failed to load portfolio data</div>
           )}
         </div>
+
+        <RiskMetricCard metrics={analyticsData?.risk_metrics ?? null} />
       </main>
 
       <StatusBar />
