@@ -306,3 +306,89 @@ async def explain_research(
     }
 
     return generate_explanation(input_data)
+
+
+@router.get('/{symbol}/earnings-summary')
+async def get_earnings_summary(symbol: str) -> dict[str, Any]:
+    """Generate AI-powered earnings summary from existing earnings data."""
+    sym = symbol.upper()
+
+    from app.providers.finnhub import fetch_earnings as get_earnings
+
+    result = await get_earnings(sym)
+
+    if isinstance(result, dict) and 'error' in result:
+        return {'symbol': sym, 'quarterly_trend': None, 'summary': None}
+
+    earnings_raw = result.get('earnings', []) if isinstance(result, dict) else result
+
+    if not earnings_raw or len(earnings_raw) < 2:
+        return {
+            'symbol': sym,
+            'quarterly_trend': None,
+            'summary': 'Insufficient earnings history available.',
+        }
+
+    beats = 0
+    total = 0
+    surprises: list[float] = []
+    for q in earnings_raw[:8]:
+        actual = q.get('actual', 0)
+        estimate = q.get('estimate', 0)
+        if actual and estimate:
+            total += 1
+            if actual >= estimate:
+                beats += 1
+            surprise = round(((actual - estimate) / abs(estimate)) * 100, 1) if estimate else 0
+            surprises.append(surprise)
+
+    avg_surprise = round(sum(surprises) / len(surprises), 1) if surprises else 0
+    beat_rate = round((beats / total) * 100, 1) if total else 0
+    recent = earnings_raw[0] if earnings_raw else {}
+    last_surprise = (
+        round(
+            ((recent.get('actual', 0) - recent.get('estimate', 0)) / abs(recent.get('estimate', 1))) * 100,
+            1,
+        )
+        if recent.get('estimate')
+        else 0
+    )
+
+    summary = ''
+    if avg_surprise > 0:
+        summary = (
+            f'{sym} has beaten EPS estimates in {beats} of the last {total} quarters '
+            f'({beat_rate}%), with an average surprise of +{avg_surprise}%. '
+        )
+        if last_surprise > avg_surprise:
+            summary += (
+                f'The most recent quarter showed a +{last_surprise}% beat, '
+                'continuing the trend of outperformance. '
+            )
+        else:
+            summary += f'The most recent quarter showed a +{last_surprise}% beat. '
+    else:
+        summary = (
+            f'{sym} has missed EPS estimates in {total - beats} of the last {total} quarters, '
+            f'with an average miss of {avg_surprise}%. '
+        )
+
+    if avg_surprise > 3:
+        summary += 'The company has consistently exceeded expectations, suggesting conservative guidance.'
+    elif avg_surprise > 0:
+        summary += 'Earnings have generally met or exceeded expectations.'
+    else:
+        summary += 'The company has struggled to meet analyst expectations.'
+
+    return {
+        'symbol': sym,
+        'quarterly_trend': {
+            'beat_count': beats,
+            'total_quarters': total,
+            'beat_rate': beat_rate,
+            'avg_surprise_pct': avg_surprise,
+            'last_surprise_pct': last_surprise,
+        },
+        'summary': summary,
+        'summary_type': 'computed',
+    }

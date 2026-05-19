@@ -177,3 +177,21 @@ class AlertEvent(Base):
     triggered_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+
+
+class Order(Base):
+    __tablename__ = 'orders'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    symbol: Mapped[str] = mapped_column(String(10), nullable=False)
+    side: Mapped[str] = mapped_column(String(10), nullable=False)
+    quantity: Mapped[float] = mapped_column(Float, nullable=False)
+    order_type: Mapped[str] = mapped_column(String(20), default='market')
+    time_in_force: Mapped[str] = mapped_column(String(10), default='day')
+    status: Mapped[str] = mapped_column(String(20), default='pending')
+    filled_price: Mapped[float] = mapped_column(Float, default=0.0)
+    filled_qty: Mapped[float] = mapped_column(Float, default=0.0)
+    order_id: Mapped[str] = mapped_column(String(100), default='')
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )

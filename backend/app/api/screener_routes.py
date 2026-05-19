@@ -56,6 +56,10 @@ async def get_screener(
     # Dividends
     min_dividend_yield: float | None = Query(None, alias='minDividendYield'),
     max_dividend_yield: float | None = Query(None, alias='maxDividendYield'),
+    # Asset type & ETF filters
+    asset_type: str = Query('', alias='assetType'),
+    expense_ratio_min: float | None = Query(None, alias='expenseRatioMin'),
+    expense_ratio_max: float | None = Query(None, alias='expenseRatioMax'),
     sort_by: str = Query('symbol', alias='sortBy'),
     sort_dir: str = Query('asc', alias='sortDir'),
     limit: int = 50,
@@ -87,6 +91,9 @@ async def get_screener(
         min_inst_ownership=min_inst_ownership,
         dividend_yield_min=min_dividend_yield,
         dividend_yield_max=max_dividend_yield,
+        asset_type=asset_type,
+        expense_ratio_min=expense_ratio_min,
+        expense_ratio_max=expense_ratio_max,
         sort_by=sort_by,
         sort_dir=sort_dir,
         limit=limit,
@@ -120,6 +127,9 @@ async def export_screener_csv(
     min_inst_ownership: float | None = Query(None, alias='minInstOwnership'),
     min_dividend_yield: float | None = Query(None, alias='minDividendYield'),
     max_dividend_yield: float | None = Query(None, alias='maxDividendYield'),
+    asset_type: str = Query('', alias='assetType'),
+    expense_ratio_min: float | None = Query(None, alias='expenseRatioMin'),
+    expense_ratio_max: float | None = Query(None, alias='expenseRatioMax'),
     sort_by: str = Query('symbol', alias='sortBy'),
     sort_dir: str = Query('asc', alias='sortDir'),
     limit: int = 500,
@@ -151,6 +161,9 @@ async def export_screener_csv(
         min_inst_ownership=min_inst_ownership,
         dividend_yield_min=min_dividend_yield,
         dividend_yield_max=max_dividend_yield,
+        asset_type=asset_type,
+        expense_ratio_min=expense_ratio_min,
+        expense_ratio_max=expense_ratio_max,
         sort_by=sort_by,
         sort_dir=sort_dir,
         limit=limit,
@@ -164,6 +177,7 @@ async def export_screener_csv(
         'market_cap', 'pe_ratio', 'ps_ratio', 'pb_ratio',
         'debt_to_equity', 'profit_margin', 'revenue_growth',
         'beta', 'short_float', 'inst_ownership', 'dividend_yield', 'rsi',
+        'asset_type', 'expense_ratio',
     ]
     writer.writerow(columns)
     for row in data['results']:
