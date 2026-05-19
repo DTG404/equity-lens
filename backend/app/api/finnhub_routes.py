@@ -43,5 +43,5 @@ async def get_analyst_ratings_endpoint(symbol: str) -> dict[str, Any]:
     """Fetch analyst consensus ratings for a symbol."""
     result = await get_analyst_ratings(symbol.upper())
     if 'error' in result:
-        raise HTTPException(status_code=404, detail=result['error'])
+        return {'total_analysts': 0, 'ratings': {'buy': 0, 'hold': 0, 'sell': 0}, 'consensus': 'hold', 'period': ''}
     return result
