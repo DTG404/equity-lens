@@ -124,3 +124,39 @@ async def fetch_earnings_calendar() -> list[dict[str, Any]]:
             return result
     except Exception:
         return []
+
+
+async def get_analyst_ratings(symbol: str) -> dict[str, Any]:
+    """Fetch analyst ratings from Finnhub."""
+    if not settings.finnhub_api_key:
+        return {'error': 'Finnhub API key not configured'}
+
+    try:
+        url = f'{BASE_URL}/stock/recommendation'
+        params = {'symbol': symbol, 'token': settings.finnhub_api_key}
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, params=params, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+    except Exception:
+        return {'error': 'Failed to fetch analyst data'}
+
+    if not data:
+        return {'error': 'No analyst data available'}
+
+    latest = data[0]
+    total = sum(latest.get(k, 0) for k in ['strongBuy', 'buy', 'hold', 'sell', 'strongSell'])
+    buy = latest.get('strongBuy', 0) + latest.get('buy', 0)
+    hold = latest.get('hold', 0)
+    sell = latest.get('sell', 0) + latest.get('strongSell', 0)
+
+    consensus = 'buy' if buy > hold + sell else 'sell' if sell > buy + hold else 'hold'
+    if total > 0 and buy > 0 and buy > hold + sell:
+        consensus = 'strong_buy' if buy / total > 0.6 else 'buy'
+
+    return {
+        'total_analysts': total,
+        'ratings': {'buy': buy, 'hold': hold, 'sell': sell},
+        'consensus': consensus,
+        'period': latest.get('period', ''),
+    }

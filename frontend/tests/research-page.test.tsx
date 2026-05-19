@@ -38,13 +38,6 @@ vi.mock('lightweight-charts', () => ({
   HistogramSeries: 'HistogramSeries' as any,
 }));
 
-const today = new Date();
-const daysAgo = (n: number) => {
-  const d = new Date(today);
-  d.setDate(d.getDate() - n);
-  return d.toISOString().slice(0, 10);
-};
-
 const mockResearchData: api.ResearchData = {
   symbol: 'AAPL',
   quote: {
@@ -54,9 +47,9 @@ const mockResearchData: api.ResearchData = {
     provider: 'mock',
   },
   price_history: [
-    { date: daysAgo(2), open: 180, high: 182, low: 179, close: 181, volume: 1000000 },
-    { date: daysAgo(1), open: 181, high: 184, low: 180, close: 183, volume: 1200000 },
-    { date: daysAgo(0), open: 183, high: 186, low: 182, close: 185.5, volume: 1100000 },
+    { date: new Date(Date.now() - 2 * 86400000).toISOString().slice(0, 10), open: 180, high: 182, low: 179, close: 181, volume: 1000000 },
+    { date: new Date(Date.now() - 86400000).toISOString().slice(0, 10), open: 181, high: 184, low: 180, close: 183, volume: 1200000 },
+    { date: new Date().toISOString().slice(0, 10), open: 183, high: 186, low: 182, close: 185.5, volume: 1100000 },
   ],
   news: [
     {

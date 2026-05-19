@@ -4,7 +4,12 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
-from app.providers.finnhub import fetch_earnings, fetch_earnings_calendar, fetch_news
+from app.providers.finnhub import (
+    fetch_earnings,
+    fetch_earnings_calendar,
+    fetch_news,
+    get_analyst_ratings,
+)
 
 router = APIRouter(prefix='/finnhub', tags=['finnhub'])
 
@@ -31,3 +36,12 @@ async def company_earnings(symbol: str) -> dict[str, Any]:
 async def earnings_calendar() -> list[dict[str, Any]]:
     """Get upcoming earnings across the market."""
     return await fetch_earnings_calendar()
+
+
+@router.get('/analysts/{symbol}')
+async def get_analyst_ratings_endpoint(symbol: str) -> dict[str, Any]:
+    """Fetch analyst consensus ratings for a symbol."""
+    result = await get_analyst_ratings(symbol.upper())
+    if 'error' in result:
+        return {'total_analysts': 0, 'ratings': {'buy': 0, 'hold': 0, 'sell': 0}, 'consensus': 'hold', 'period': ''}
+    return result

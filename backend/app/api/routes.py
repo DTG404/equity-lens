@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends
 from app.api.alert_routes import router as alert_router
 from app.api.backtest_routes import router as backtest_router
 from app.api.broker_routes import router as broker_router
+from app.api.compare_routes import peers_router
 from app.api.compare_routes import router as compare_router
 from app.api.csv_routes import router as csv_router
 from app.api.dcf_routes import router as dcf_router
@@ -14,6 +15,7 @@ from app.api.macro_routes import router as macro_router
 from app.api.markets_routes import router as markets_router
 from app.api.news_routes import router as news_router
 from app.api.notifications_routes import router as notifications_router
+from app.api.pattern_routes import router as pattern_router
 from app.api.portfolio_routes import router as portfolio_router
 from app.api.quote_routes import router as quote_router
 from app.api.research_routes import router as research_router
@@ -65,3 +67,5 @@ router.include_router(sec_router, prefix='/sec')
 router.include_router(social_router)
 router.include_router(technicals_router)
 router.include_router(notifications_router)
+router.include_router(pattern_router)
+router.include_router(peers_router)
