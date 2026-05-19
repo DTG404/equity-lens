@@ -8,6 +8,7 @@ from app.api.csv_routes import router as csv_router
 from app.api.dcf_routes import router as dcf_router
 from app.api.finnhub_routes import router as finnhub_router
 from app.api.fundamentals_routes import router as fundamentals_router
+from app.api.heatmap_routes import router as heatmap_router
 from app.api.holdings_routes import router as holdings_router
 from app.api.macro_routes import router as macro_router
 from app.api.markets_routes import router as markets_router
@@ -56,6 +57,7 @@ router.include_router(csv_router)
 router.include_router(dcf_router)
 router.include_router(finnhub_router)
 router.include_router(fundamentals_router)
+router.include_router(heatmap_router)
 router.include_router(signals_router)
 router.include_router(macro_router)
 router.include_router(markets_router)

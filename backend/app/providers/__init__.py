@@ -3,7 +3,7 @@
 from typing import Any
 
 from app.core.config import settings
-from app.providers.base import MarketDataProvider
+from app.providers.base import BrokerProvider, MarketDataProvider
 from app.providers.mock_market import MockMarketDataProvider
 from app.providers.yfinance_news import YFinanceNewsProvider
 from app.providers.yfinance_provider import YFinanceMarketDataProvider
@@ -23,3 +23,13 @@ def get_news_provider() -> Any:
     if name == 'yfinance':
         return YFinanceNewsProvider()
     return YFinanceNewsProvider()
+
+
+def get_broker_provider() -> BrokerProvider:
+    """Return the configured broker provider."""
+    name = settings.broker_provider
+    if name == 'alpaca':
+        from app.providers.alpaca import AlpacaBrokerProvider
+
+        return AlpacaBrokerProvider()
+    raise ValueError(f'Unknown broker provider: {name}')

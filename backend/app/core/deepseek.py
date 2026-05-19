@@ -145,3 +145,102 @@ async def _call_deepseek_api(api_key: str, prompt: str) -> dict[str, Any]:
         parsed: dict[str, Any] = json.loads(content)
         parsed['model'] = DEEPSEEK_MODEL
         return parsed
+
+
+def generate_explanation(input_data: dict[str, Any]) -> dict[str, Any]:
+    """Generate a beginner-friendly explanation using DeepSeek or fallback."""
+    from app.core.config import settings
+
+    api_key = settings.deepseek_api_key
+    if not api_key:
+        return _fallback_explanation(input_data)
+
+    try:
+        prompt = _build_explain_prompt(input_data)
+        response = httpx.post(
+            'https://api.deepseek.com/v1/chat/completions',
+            headers={'Authorization': f'Bearer {api_key}'},
+            json={
+                'model': 'deepseek-chat',
+                'messages': [{'role': 'user', 'content': prompt}],
+                'temperature': 0.7,
+                'max_tokens': 1000,
+            },
+            timeout=30,
+        )
+        response.raise_for_status()
+        text = response.json()['choices'][0]['message']['content']
+        return _parse_explanation(text)
+    except Exception:
+        return _fallback_explanation(input_data)
+
+
+def _build_explain_prompt(data: dict[str, Any]) -> str:
+    return (
+        f"You are a patient investing mentor. Explain {data.get('symbol')} analysis "
+        f"to a complete beginner in plain English.\n\n"
+        f"Overall score: {data.get('overall_score', 0.5)*100:.0f}% ({data.get('stance', 'neutral')})\n"
+        f"Technical: {data.get('technical_score', 0.5)*100:.0f}%\n"
+        f"News Sentiment: {data.get('news_sentiment_score', 0.5)*100:.0f}%\n"
+        f"Fundamentals: {data.get('fundamental_score', 0.5)*100:.0f}%\n"
+        f"Macro: {data.get('macro_score', 0.5)*100:.0f}%\n"
+        f"Thesis: {data.get('thesis', 'N/A')}\n"
+        f"Recent news: {data.get('news_titles', 'None')}\n\n"
+        "Provide:\n"
+        "1. Plain-language explanation (2-3 paragraphs)\n"
+        "2. 3-5 key takeaways (bullet points)\n"
+        "3. 2-3 questions the investor should ask themselves\n\n"
+        "Write in simple English. Avoid jargon."
+    )
+
+
+def _fallback_explanation(data: dict[str, Any]) -> dict[str, Any]:
+    stance = data.get('stance', 'neutral')
+    overall = data.get('overall_score', 0.5) * 100
+    return {
+        'explanation': (
+            f"{data.get('symbol')} has an overall score of {overall:.0f}%, "
+            f"which suggests a {stance} outlook. "
+            f"This score considers technical indicators, news sentiment, fundamentals, and macro conditions. "
+            f"Always remember that past performance doesn't guarantee future results."
+        ),
+        'key_takeaways': [
+            f"The overall score of {overall:.0f}% indicates a {stance} outlook.",
+            "This analysis combines multiple factors—not just one signal.",
+            "Consider diversifying rather than acting on a single stock assessment.",
+        ],
+        'questions_to_ask': [
+            'Do I understand what is driving this score?',
+            'What would need to change for my view to be wrong?',
+            'How does this fit into my overall investment plan?',
+        ],
+    }
+
+
+def _parse_explanation(text: str) -> dict[str, Any]:
+    lines = [ln.strip() for ln in text.strip().split('\n') if ln.strip()]
+    explanation_parts = []
+    takeaways = []
+    questions = []
+    mode = 'explanation'
+
+    for line in lines:
+        lower = line.lower()
+        if 'key takeaways' in lower:
+            mode = 'takeaways'
+            continue
+        if ('question' in lower and 'ask' in lower) or 'ask yourself' in lower:
+            mode = 'questions'
+            continue
+        if mode == 'takeaways' and (line.startswith('- ') or line.startswith('* ') or line[0].isdigit()):
+            takeaways.append(line.lstrip('- *0123456789. '))
+        elif mode == 'questions' and (line.startswith('- ') or line.startswith('* ') or line[0].isdigit()):
+            questions.append(line.lstrip('- *0123456789. '))
+        elif mode == 'explanation':
+            explanation_parts.append(line)
+
+    return {
+        'explanation': ' '.join(explanation_parts) if explanation_parts else text,
+        'key_takeaways': takeaways[:5] if takeaways else ['Analysis complete.'],
+        'questions_to_ask': questions[:3] if questions else ['Review the analysis details.'],
+    }
