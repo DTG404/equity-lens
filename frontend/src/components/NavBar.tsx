@@ -8,8 +8,9 @@ const navItems = [
   { label: 'Dashboard', href: '/', shortcut: '⌘1' },
   { label: 'Research', href: '/research', shortcut: '⌘2' },
   { label: 'Screener', href: '/screener', shortcut: '⌘3' },
-  { label: 'Signals', href: '/signals', shortcut: '⌘4' },
-  { label: 'Portfolio', href: '/portfolio', shortcut: '⌘5' },
+  { label: 'Compare', href: '/compare', shortcut: '⌘4' },
+  { label: 'Signals', href: '/signals', shortcut: '⌘5' },
+  { label: 'Portfolio', href: '/portfolio', shortcut: '⌘6' },
 ];
 
 export default function NavBar() {

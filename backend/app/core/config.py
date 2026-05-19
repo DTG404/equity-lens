@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     smtp_password: str = ''
     alert_email: str = ''
     discord_webhook_url: str = ''
+    broker_provider: str = 'alpaca'
+    broker_sync_seconds: int = 3600
 
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
         env_file='.env', env_file_encoding='utf-8', extra='ignore'

@@ -30,6 +30,29 @@ async def screen_stocks(
     rsi_min: float | None = None,
     rsi_max: float | None = None,
     volume_min: int | None = None,
+    # Valuation
+    pe_min: float | None = None,
+    pe_max: float | None = None,
+    ps_min: float | None = None,
+    ps_max: float | None = None,
+    pb_min: float | None = None,
+    pb_max: float | None = None,
+    # Financial health
+    max_debt_to_equity: float | None = None,
+    min_profit_margin: float | None = None,
+    min_revenue_growth: float | None = None,
+    # Market metrics
+    market_cap_min: float | None = None,
+    market_cap_max: float | None = None,
+    beta_min: float | None = None,
+    beta_max: float | None = None,
+    # Ownership
+    short_float_min: float | None = None,
+    short_float_max: float | None = None,
+    min_inst_ownership: float | None = None,
+    # Dividends
+    dividend_yield_min: float | None = None,
+    dividend_yield_max: float | None = None,
     sort_by: str = 'symbol',
     sort_dir: str = 'asc',
     limit: int = 50,
@@ -87,6 +110,65 @@ async def screen_stocks(
         if sector and sector.lower() not in (info.get('sector') or '').lower():
             continue
 
+        # Extract new metric values (may be None if yfinance doesn't have them)
+        market_cap = info.get('marketCap')
+        pe = info.get('trailingPE')
+        ps = info.get('priceToSalesTrailingMonths')
+        pb = info.get('priceToBook')
+        debt_to_equity = info.get('debtToEquity')
+        profit_margin = info.get('profitMargins')
+        revenue_growth = info.get('revenueGrowth')
+        beta = info.get('beta')
+        short_float = info.get('shortPercentOfFloat')
+        inst_ownership = info.get('heldPercentInstitutions')
+        dividend_yield = info.get('dividendYield')
+
+        # Apply valuation filters
+        if pe_min is not None and (pe is None or pe < pe_min):
+            continue
+        if pe_max is not None and (pe is None or pe > pe_max):
+            continue
+        if ps_min is not None and (ps is None or ps < ps_min):
+            continue
+        if ps_max is not None and (ps is None or ps > ps_max):
+            continue
+        if pb_min is not None and (pb is None or pb < pb_min):
+            continue
+        if pb_max is not None and (pb is None or pb > pb_max):
+            continue
+
+        # Apply financial health filters
+        if max_debt_to_equity is not None and (debt_to_equity is None or debt_to_equity > max_debt_to_equity):
+            continue
+        if min_profit_margin is not None and (profit_margin is None or profit_margin < min_profit_margin):
+            continue
+        if min_revenue_growth is not None and (revenue_growth is None or revenue_growth < min_revenue_growth):
+            continue
+
+        # Apply market metric filters
+        if market_cap_min is not None and (market_cap is None or market_cap < market_cap_min):
+            continue
+        if market_cap_max is not None and (market_cap is None or market_cap > market_cap_max):
+            continue
+        if beta_min is not None and (beta is None or beta < beta_min):
+            continue
+        if beta_max is not None and (beta is None or beta > beta_max):
+            continue
+
+        # Apply ownership filters
+        if short_float_min is not None and (short_float is None or short_float < short_float_min):
+            continue
+        if short_float_max is not None and (short_float is None or short_float > short_float_max):
+            continue
+        if min_inst_ownership is not None and (inst_ownership is None or inst_ownership < min_inst_ownership):
+            continue
+
+        # Apply dividend filters
+        if dividend_yield_min is not None and (dividend_yield is None or dividend_yield < dividend_yield_min):
+            continue
+        if dividend_yield_max is not None and (dividend_yield is None or dividend_yield > dividend_yield_max):
+            continue
+
         # Get technicals for RSI filter (only if needed)
         rsi = None
         if rsi_min is not None or rsi_max is not None:
@@ -110,14 +192,28 @@ async def screen_stocks(
             'change_percent': round(float(data['change']), 2),
             'volume': int(vol),
             'sector': info.get('sector') or '',
-            'market_cap': info.get('marketCap'),
-            'pe_ratio': info.get('trailingPE'),
+            'market_cap': market_cap,
+            'pe_ratio': pe,
+            'ps_ratio': ps,
+            'pb_ratio': pb,
+            'debt_to_equity': debt_to_equity,
+            'profit_margin': profit_margin,
+            'revenue_growth': revenue_growth,
+            'beta': beta,
+            'short_float': short_float,
+            'inst_ownership': inst_ownership,
+            'dividend_yield': dividend_yield,
             'rsi': round(rsi, 1) if rsi is not None else None,
         })
 
     # Sort
     reverse = sort_dir.lower() == 'desc'
-    valid_keys = {'symbol', 'price', 'change_percent', 'volume', 'market_cap', 'pe_ratio', 'rsi'}
+    valid_keys = {
+        'symbol', 'price', 'change_percent', 'volume', 'market_cap', 'pe_ratio',
+        'ps_ratio', 'pb_ratio', 'debt_to_equity', 'profit_margin',
+        'revenue_growth', 'beta', 'short_float', 'inst_ownership',
+        'dividend_yield', 'rsi',
+    }
     if sort_by in valid_keys:
         results.sort(key=lambda x: (x.get(sort_by) is None, x.get(sort_by) or 0), reverse=reverse)
 

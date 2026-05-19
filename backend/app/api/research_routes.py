@@ -249,3 +249,60 @@ async def get_research(
         'analysis_id': analysis_id,
         'analysis_created_at': analysis.created_at.isoformat(),
     }
+
+
+@router.post('/{symbol}/explain')
+async def explain_research(
+    symbol: str,
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
+    """Generate a beginner-friendly explanation of the analysis."""
+    sym = symbol.upper()
+
+    # Check watchlist
+    result = await session.execute(
+        select(models.WatchlistEntry).where(models.WatchlistEntry.symbol == sym)
+    )
+    if result.scalar_one_or_none() is None:
+        raise HTTPException(status_code=404, detail=f'{sym} not in watchlist')
+
+    # Get latest analysis
+    analysis_result = await session.execute(
+        select(models.Analysis)
+        .where(models.Analysis.symbol == sym)
+        .order_by(models.Analysis.created_at.desc())
+        .limit(1)
+    )
+    analysis = analysis_result.scalar_one_or_none()
+    if analysis is None:
+        return {
+            'explanation': f'No analysis found for {sym}. Run research first.',
+            'key_takeaways': [],
+            'questions_to_ask': [],
+        }
+
+    # Get recent news titles
+    news_result = await session.execute(
+        select(models.NewsArticle)
+        .where(models.NewsArticle.symbol == sym)
+        .order_by(models.NewsArticle.published_at.desc())
+        .limit(5)
+    )
+    news_titles = [n.title for n in news_result.scalars().all()]
+
+    from app.core.deepseek import generate_explanation
+
+    input_data = {
+        'symbol': sym,
+        'company_name': sym,
+        'technical_score': analysis.technical_score,
+        'news_sentiment_score': analysis.news_sentiment_score,
+        'fundamental_score': analysis.fundamental_score,
+        'macro_score': analysis.macro_score,
+        'overall_score': analysis.overall_score,
+        'stance': analysis.stance,
+        'thesis': analysis.thesis,
+        'news_titles': '\n'.join(news_titles) if news_titles else 'No recent news.',
+    }
+
+    return generate_explanation(input_data)

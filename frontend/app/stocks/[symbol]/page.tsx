@@ -7,6 +7,7 @@ import PriceChart from '@/components/PriceChart';
 import FactorScoreCard from '@/components/FactorScoreCard';
 import ScenarioCard from '@/components/ScenarioCard';
 import SignalHistory from '@/components/SignalHistory';
+import ExplainPanel from '@/components/ExplainPanel';
 import { FundamentalsPanel, TechnicalsPanel } from '@/components/ResearchPanels';
 import NavBar from '@/components/NavBar';
 import StatusBar from '@/components/StatusBar';
@@ -237,6 +238,11 @@ export default function ResearchPage({ params }: ResearchPageProps) {
                   <p className="text-xs leading-relaxed text-white/50">{data.risks}</p>
                 </div>
               </div>
+            </div>
+
+            {/* AI Explain */}
+            <div className="mb-3">
+              <ExplainPanel symbol={symbol} apiBase={process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'} />
             </div>
 
             {/* Scenarios */}
