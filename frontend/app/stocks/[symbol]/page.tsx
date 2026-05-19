@@ -8,7 +8,11 @@ import FactorScoreCard from '@/components/FactorScoreCard';
 import ScenarioCard from '@/components/ScenarioCard';
 import SignalHistory from '@/components/SignalHistory';
 import ExplainPanel from '@/components/ExplainPanel';
+import TradePanel from '@/components/TradePanel';
 import { FundamentalsPanel, TechnicalsPanel } from '@/components/ResearchPanels';
+import DividendPanel from '@/components/DividendPanel';
+import ShortInterestPanel from '@/components/ShortInterestPanel';
+import EarningsSummaryCard from '@/components/EarningsSummary';
 import NavBar from '@/components/NavBar';
 import StatusBar from '@/components/StatusBar';
 
@@ -199,6 +203,9 @@ export default function ResearchPage({ params }: ResearchPageProps) {
 
               <div>
                 <FactorScoreCard scores={data.scores} />
+                <div className="mt-3">
+                  <TradePanel symbol={symbol} currentPrice={data.quote?.price ?? 0} />
+                </div>
               </div>
             </div>
 
@@ -206,6 +213,17 @@ export default function ResearchPage({ params }: ResearchPageProps) {
             <div className="mb-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
               <FundamentalsPanel symbol={symbol} />
               <TechnicalsPanel symbol={symbol} />
+            </div>
+
+            {/* Earnings Summary */}
+            <div className="mb-3">
+              <EarningsSummaryCard symbol={symbol} />
+            </div>
+
+            {/* Dividends + Short Interest */}
+            <div className="mb-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
+              <DividendPanel symbol={symbol} />
+              <ShortInterestPanel symbol={symbol} />
             </div>
 
             {/* Thesis + Scenarios */}

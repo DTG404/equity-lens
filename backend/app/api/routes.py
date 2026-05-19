@@ -11,6 +11,7 @@ from app.api.fundamentals_routes import router as fundamentals_router
 from app.api.heatmap_routes import router as heatmap_router
 from app.api.holdings_routes import router as holdings_router
 from app.api.macro_routes import router as macro_router
+from app.api.markets_routes import router as markets_router
 from app.api.news_routes import router as news_router
 from app.api.notifications_routes import router as notifications_router
 from app.api.portfolio_routes import router as portfolio_router
@@ -58,6 +59,7 @@ router.include_router(fundamentals_router)
 router.include_router(heatmap_router)
 router.include_router(signals_router)
 router.include_router(macro_router)
+router.include_router(markets_router)
 router.include_router(screener_router)
 router.include_router(sec_router, prefix='/sec')
 router.include_router(social_router)

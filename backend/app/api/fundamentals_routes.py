@@ -18,6 +18,73 @@ SECTORS = [
 ]
 
 
+@router.get('/{symbol}/dividends')
+async def get_dividends(symbol: str) -> dict[str, Any]:
+    """Fetch dividend data for a symbol from yfinance."""
+    import yfinance as yf
+    sym = symbol.upper()
+    ticker = yf.Ticker(sym)
+    info = ticker.info or {}
+
+    dividends = ticker.dividends
+    history = []
+    if dividends is not None and not dividends.empty:
+        for date, amount in dividends.tail(20).items():
+            history.append({
+                'date': str(date.date()) if hasattr(date, 'date') else str(date),
+                'amount': round(float(amount), 4),
+            })
+
+    return {
+        'symbol': sym,
+        'dividend_yield': round(float(info.get('dividendYield', 0) * 100) if info.get('dividendYield') else 0, 2),
+        'payout_ratio': round(float(info.get('payoutRatio', 0) * 100) if info.get('payoutRatio') else 0, 2),
+        'dividend_per_share': round(float(info.get('dividendRate', 0)), 2) if info.get('dividendRate') else 0,
+        'ex_dividend_date': str(info.get('exDividendDate') or ''),
+        'history': history,
+    }
+
+
+@router.get('/{symbol}/short-interest')
+async def get_short_interest(symbol: str) -> dict[str, Any]:
+    """Fetch short interest data for a symbol from yfinance."""
+    import yfinance as yf
+    sym = symbol.upper()
+    ticker = yf.Ticker(sym)
+    info = ticker.info or {}
+
+    short_pct = float(info.get('shortPercentOfFloat', 0) * 100) if info.get('shortPercentOfFloat') else 0
+    short_ratio = float(info.get('shortRatio', 0) or 0)
+    shares_short = int(info.get('sharesShort', 0) or 0)
+
+    squeeze_score = 0
+    if short_pct > 5:
+        squeeze_score += 25
+    if short_pct > 10:
+        squeeze_score += 25
+    if short_ratio > 3:
+        squeeze_score += 25
+    if short_ratio > 5:
+        squeeze_score += 25
+
+    if squeeze_score >= 75:
+        squeeze_signal = 'potential'
+    elif squeeze_score >= 50:
+        squeeze_signal = 'watch'
+    else:
+        squeeze_signal = 'low'
+
+    return {
+        'symbol': sym,
+        'short_percent_of_float': round(short_pct, 2),
+        'short_ratio': round(short_ratio, 2),
+        'shares_short': shares_short,
+        'days_to_cover': round(short_ratio, 2),
+        'squeeze_score': squeeze_score,
+        'squeeze_signal': squeeze_signal,
+    }
+
+
 @router.get('/{symbol}')
 async def get_fundamentals(symbol: str) -> dict[str, Any]:
     """Fetch fundamental financial data for a symbol from SEC EDGAR."""

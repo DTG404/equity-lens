@@ -20,6 +20,16 @@ UNIVERSE = [
     'REGN', 'VRTX', 'GILD', 'AMGN', 'ISRG', 'MDT', 'SYY', 'ZTS', 'CL', 'TGT',
 ]
 
+ETF_UNIVERSE = [
+    'SPY', 'QQQ', 'IVV', 'VTI', 'VOO', 'IWM', 'VXUS', 'BND', 'AGG', 'GLD',
+    'SLV', 'TLT', 'IEF', 'LQD', 'HYG', 'EEM', 'VWO', 'XLF', 'XLK', 'XLV',
+    'XLE', 'XLI', 'XLB', 'XLRE', 'XLU', 'XLP', 'XLY', 'XLC', 'ARKK', 'ARKG',
+    'QCLN', 'TAN', 'ICLN', 'LABU', 'SOXX', 'SMH', 'IBIT', 'FBTC', 'BITO', 'USO', 'UNG',
+]
+
+ALL_SYMBOLS = [*UNIVERSE, *ETF_UNIVERSE]
+ETF_SET = frozenset(ETF_UNIVERSE)
+
 _fundamentals_provider = FundamentalsProvider()
 
 
@@ -53,6 +63,10 @@ async def screen_stocks(
     # Dividends
     dividend_yield_min: float | None = None,
     dividend_yield_max: float | None = None,
+    # Asset type & ETF filters
+    asset_type: str = '',
+    expense_ratio_min: float | None = None,
+    expense_ratio_max: float | None = None,
     sort_by: str = 'symbol',
     sort_dir: str = 'asc',
     limit: int = 50,
@@ -82,8 +96,8 @@ async def screen_stocks(
         except Exception:
             return None
 
-    # Fetch all stocks concurrently using thread pool
-    tasks = [asyncio.to_thread(fetch_stock, symbol) for symbol in UNIVERSE]
+    # Fetch all stocks and ETFs concurrently using thread pool
+    tasks = [asyncio.to_thread(fetch_stock, symbol) for symbol in ALL_SYMBOLS]
     stock_data = await asyncio.gather(*tasks)
 
     for data in stock_data:
@@ -169,6 +183,21 @@ async def screen_stocks(
         if dividend_yield_max is not None and (dividend_yield is None or dividend_yield > dividend_yield_max):
             continue
 
+        # Determine asset type and extract expense ratio
+        sym_asset_type = 'etf' if symbol in ETF_SET else 'stock'
+        expense_ratio = info.get('expenseRatio') if sym_asset_type == 'etf' else None
+
+        # Apply asset type filter
+        if asset_type and sym_asset_type != asset_type:
+            continue
+
+        # Apply expense ratio filter (only meaningful for ETFs)
+        if expense_ratio is not None:
+            if expense_ratio_min is not None and expense_ratio < expense_ratio_min:
+                continue
+            if expense_ratio_max is not None and expense_ratio > expense_ratio_max:
+                continue
+
         # Get technicals for RSI filter (only if needed)
         rsi = None
         if rsi_min is not None or rsi_max is not None:
@@ -204,6 +233,8 @@ async def screen_stocks(
             'inst_ownership': inst_ownership,
             'dividend_yield': dividend_yield,
             'rsi': round(rsi, 1) if rsi is not None else None,
+            'asset_type': sym_asset_type,
+            'expense_ratio': round(float(expense_ratio), 4) if expense_ratio is not None else None,
         })
 
     # Sort
@@ -212,7 +243,7 @@ async def screen_stocks(
         'symbol', 'price', 'change_percent', 'volume', 'market_cap', 'pe_ratio',
         'ps_ratio', 'pb_ratio', 'debt_to_equity', 'profit_margin',
         'revenue_growth', 'beta', 'short_float', 'inst_ownership',
-        'dividend_yield', 'rsi',
+        'dividend_yield', 'rsi', 'asset_type', 'expense_ratio',
     }
     if sort_by in valid_keys:
         results.sort(key=lambda x: (x.get(sort_by) is None, x.get(sort_by) or 0), reverse=reverse)

@@ -50,4 +50,5 @@ dev = [
     "mypy>=1.15",
     "pip-audit>=2.9",
     "psycopg2-binary>=2.9",
+    "respx>=0.23.1",
 ]

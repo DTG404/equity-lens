@@ -350,6 +350,26 @@ export async function fetchMacro(): Promise<MacroData> {
   return response.json() as Promise<MacroData>;
 }
 
+/* ── Sector Performance ───────────────────────────────────── */
+
+export interface SectorPerformance {
+  name: string;
+  return_pct: number;
+  constituent_count: number;
+}
+
+export interface SectorPerformanceData {
+  period: string;
+  sectors: SectorPerformance[];
+}
+
+export async function fetchSectorPerformance(period?: string): Promise<SectorPerformanceData> {
+  const url = period ? `${API_BASE}/api/markets/sectors?period=${period}` : `${API_BASE}/api/markets/sectors`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('Failed to fetch sector performance');
+  return response.json() as Promise<SectorPerformanceData>;
+}
+
 /* ── Stock Screener ────────────────────────────────────────── */
 
 export interface ScreenerResult {
@@ -443,6 +463,92 @@ export async function fetchExplanation(symbol: string): Promise<ExplainData> {
   const response = await fetch(`${API_BASE}/api/research/${symbol}/explain`, { method: 'POST' });
   if (!response.ok) throw new Error('Failed to fetch explanation');
   return response.json() as Promise<ExplainData>;
+}
+
+/* ── Dividends ──────────────────────────────────────────────── */
+
+export interface DividendData {
+  symbol: string;
+  dividend_yield: number;
+  payout_ratio: number;
+  dividend_per_share: number;
+  ex_dividend_date: string;
+  history: { date: string; amount: number }[];
+}
+
+/* ── Short Interest ─────────────────────────────────────────── */
+
+export interface ShortInterestData {
+  symbol: string;
+  short_percent_of_float: number;
+  short_ratio: number;
+  shares_short: number;
+  days_to_cover: number;
+  squeeze_score: number;
+  squeeze_signal: string;
+}
+
+export async function fetchShortInterest(symbol: string): Promise<ShortInterestData> {
+  const response = await fetch(`${API_BASE}/api/fundamentals/${symbol}/short-interest`);
+  if (!response.ok) throw new Error('Failed to fetch short interest');
+  return response.json() as Promise<ShortInterestData>;
+}
+
+/* ── Earnings Summary ───────────────────────────────────────── */
+
+export interface EarningsSummary {
+  symbol: string;
+  quarterly_trend: {
+    beat_count: number;
+    total_quarters: number;
+    beat_rate: number;
+    avg_surprise_pct: number;
+    last_surprise_pct: number;
+  } | null;
+  summary: string | null;
+}
+
+export async function fetchEarningsSummary(symbol: string): Promise<EarningsSummary> {
+  const response = await fetch(`${API_BASE}/api/research/${symbol}/earnings-summary`);
+  if (!response.ok) throw new Error('Failed to fetch earnings summary');
+  return response.json() as Promise<EarningsSummary>;
+}
+
+export async function fetchDividends(symbol: string): Promise<DividendData> {
+  const response = await fetch(`${API_BASE}/api/fundamentals/${symbol}/dividends`);
+  if (!response.ok) throw new Error('Failed to fetch dividends');
+  return response.json() as Promise<DividendData>;
+}
+
+/* ── Broker Orders ──────────────────────────────────────────── */
+
+export interface OrderRequest {
+  symbol: string;
+  side: 'buy' | 'sell';
+  quantity: number;
+  order_type?: string;
+  time_in_force?: string;
+}
+
+export interface OrderResult {
+  id: number;
+  symbol: string;
+  side: string;
+  quantity: number;
+  status: string;
+  order_id: string;
+  filled_qty: number;
+  filled_price: number;
+}
+
+export async function placeOrder(order: OrderRequest): Promise<OrderResult> {
+  const response = await fetch(`${API_BASE}/api/broker/order`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(order),
+  });
+  if (!response.ok) throw new Error('Order failed');
+  return response.json() as Promise<OrderResult>;
 }
 
 export async function fetchScreener(params?: {
