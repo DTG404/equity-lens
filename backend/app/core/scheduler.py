@@ -331,6 +331,30 @@ async def _do_evaluate_outcomes(session: AsyncSession) -> int:
     return count
 
 
+async def sync_broker_portfolio(
+    get_session: Callable[[], AsyncSession] | None = None,
+) -> int:
+    """Sync portfolio from broker and persist to Holdings table."""
+    if get_session is not None:
+        session = get_session()
+        return await _do_broker_sync(session)
+
+    if core_db._async_session_factory is None:
+        await core_db.init_db()
+    assert core_db._async_session_factory is not None
+    async with core_db._async_session_factory() as session:
+        return await _do_broker_sync(session)
+
+
+async def _do_broker_sync(session: AsyncSession) -> int:
+    """Sync from broker and persist holdings to DB."""
+    from app.api.broker_routes import sync_and_persist
+
+    result: dict[str, object] = await sync_and_persist(session=session)
+    val = result.get('positions_synced', 0)
+    return val if isinstance(val, int) else 0
+
+
 # ── APScheduler daemon ──────────────────────────────────────────────────────────
 
 
@@ -379,6 +403,15 @@ def start_scheduler() -> AsyncIOScheduler:
             IntervalTrigger(seconds=settings.signal_eval_seconds),
             id='eval_signals',
             name='Evaluate signal outcomes',
+            replace_existing=True,
+        )
+
+    if settings.broker_sync_seconds > 0:
+        _scheduler.add_job(
+            _run_async_job(sync_broker_portfolio),
+            IntervalTrigger(seconds=settings.broker_sync_seconds),
+            id='sync_broker',
+            name='Sync broker portfolio',
             replace_existing=True,
         )
 
