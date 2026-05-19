@@ -2,7 +2,7 @@
 
 > AI-native, local-first stock research terminal.
 
-Equity Lens is a futuristic financial research terminal with a liquid glass UI, AI-powered analysis, and local-first architecture. It combines real-time market data, SEC EDGAR fundamentals, TA-Lib technical indicators, FRED macroeconomic data, news intelligence, and DeepSeek-generated thesis analysis into a single desktop application. It does not execute trades or provide financial advice.
+Equity Lens is a futuristic financial research terminal with a liquid glass UI, AI-powered analysis, and local-first architecture. It combines real-time market data, SEC EDGAR fundamentals, 30 TA-Lib technical indicators, FRED macroeconomic data, market indices, cryptocurrency data, news intelligence, and DeepSeek-generated thesis analysis into a single desktop application. It places simulated paper trades through Alpaca for educational purposes. It does not provide financial advice.
 
 ---
 
@@ -10,29 +10,44 @@ Equity Lens is a futuristic financial research terminal with a liquid glass UI, 
 
 ### Data & Analysis
 - **Watchlist management** — add/remove US stock tickers with live price tracking and AI signal badges
-- **SEC EDGAR fundamentals** — revenue, net income, EPS, balance sheet, ratios, free cash flow (free, audit-quality)
+- **SEC EDGAR fundamentals** — revenue, net income, EPS, balance sheet, ratios, free cash flow, financial statements (free, audit-quality)
 - **SEC filings browser** — view recent 10-K, 10-Q, 8-K filings in-app
 - **Insider trading** — monitor Form 4 insider transactions per ticker
 - **Institutional ownership** — track 13F filing data per ticker
 - **DCF valuation** — automated fair value estimates from SEC EDGAR fundamentals
-- **TA-Lib technical indicators** — RSI, MACD, SMA/EMA, Bollinger Bands, ATR
+- **30 TA-Lib technical indicators** — RSI, MACD, SMA/EMA, Bollinger Bands, ATR, Stochastic, Williams %R, MFI, CCI, OBV, CMF, VWAP, Keltner Channels, Parabolic SAR, Ichimoku Cloud, ADX, Aroon, Elder-Ray, A/D Line, Ultimate Oscillator, TRIX, ROC, Momentum, Donchian Channels, KAMA, HMA, SuperTrend
+- **Chart pattern recognition** — auto-detect double top/bottom, bull flags, hammers, shooting stars (10+ patterns)
 - **FRED macroeconomic dashboard** — GDP, CPI, unemployment, Fed funds rate, Treasury yields, consumer sentiment
+- **Market overview** — S&P 500, NASDAQ, DOW, VIX indices with market breadth and commodities
+- **Sector performance** — ranked sector returns with 1d/1w/1m/1y timeframe selector
 - **Social sentiment** — StockTwits bullish/bearish sentiment overlay
-- **Stock screener** — 80-ticker universe filtered by price, sector, RSI, volume, with sortable results
+- **Stock screener** — 120-ticker universe (80 stocks + 40 ETFs), filtered by price, sector, RSI, volume, market cap, P/E, beta, short float, dividend yield, and more. Saved presets, CSV export.
 - **Premium news** — Finnhub news provider with yfinance fallback
 - **Earnings calendar** — upcoming earnings dates with consensus estimates
+- **Earnings summaries** — AI-generated beat/miss analysis from historical earnings data
+- **Dividend calendar** — dividend yield, payout ratio, ex-dividend dates, payment history per ticker
+- **Short interest data** — short float %, days to cover, squeeze potential scoring
+- **Cryptocurrency data** — BTC, ETH, SOL, XRP, ADA, DOT, LINK, AVAX, MATIC, DOGE via CoinGecko
 - **AI-powered analysis** — DeepSeek-generated thesis with bull/base/bear scenarios and factor scoring
-- **Price chart** — interactive candlestick chart with volume histogram (TradingView Lightweight Charts)
+- **AI explain** — beginner-friendly explanations of stock analysis
+- **Price chart** — interactive candlestick chart with volume histogram, drawing tools, indicator overlays (SMA/EMA/Bollinger), sub-charts (RSI), chart type selector (line/area/bar)
+- **Multiticker comparison** — side-by-side comparison of 2-5 tickers on price, P/E, revenue growth, RSI, and more
+- **Peer comparison** — auto-compare against top sector peers with percentile rankings
+- **Analyst consensus** — buy/hold/sell ratings and price targets from Finnhub
 - **Per-ticker news** — deduplicated financial news with sentiment scoring
 - **Signal tracking** — 1d/1w/1m accuracy measurement with outcome logging
 - **Signal backtesting** — aggregate accuracy and returns by stance and time window
+- **Strategy backtesting** — define entry/exit conditions using RSI, SMA, EMA; backtest against historical price data
 - **Live quotes** — WebSocket streaming of real-time prices (push every 5s)
+- **Financial glossary** — hover tooltips explaining every metric (P/E, RSI, MACD, EPS, beta, etc.)
 
 ### Portfolio & Broker
 - **Holdings management** — manual positions with quantity and average cost
+- **Portfolio analytics** — allocation donut chart (by ticker/sector), portfolio value history chart, risk metrics (Sharpe ratio, alpha, beta, max drawdown, annualized volatility)
 - **Portfolio performance** — P&L tracking per position, total value, cost basis, return percentage
 - **CSV import/export** — import holdings from CSV, export to CSV
-- **Alpaca broker sync** — import real portfolio positions from Alpaca Markets (paper or live)
+- **Alpaca broker sync** — import real portfolio positions from Alpaca Markets (paper or live), auto-sync on schedule
+- **Paper trade execution** — place buy/sell orders through Alpaca paper trading account from the research page
 
 ### Alerts & Notifications
 - **Alert center** — configurable price alerts with threshold conditions, severity levels, read/unread tracking
@@ -48,12 +63,12 @@ Equity Lens is a futuristic financial research terminal with a liquid glass UI, 
 
 ### Infrastructure
 - **Local-first** — data stays on your machine, no cloud dependency
-- **APScheduler daemon** — auto-polling quotes, news, alerts, signal outcomes on configurable intervals
-- **Provider factory** — pluggable market data and news providers (mock/yfinance)
+- **APScheduler daemon** — auto-polling quotes, news, alerts, signal outcomes, broker sync on configurable intervals
+- **Provider factory** — pluggable market data, news, broker, and crypto providers
 - **Alembic migrations** — versioned database schema evolution
 - **Optional API key auth** — enable authentication when deploying
 - **CI/CD** — GitHub Actions with backend/frontend/security checks
-- **87 backend tests** — pytest, ruff, mypy
+- **121 backend tests** — pytest, ruff, mypy
 - **35 frontend tests** — vitest, testing library
 
 ---
@@ -61,40 +76,44 @@ Equity Lens is a futuristic financial research terminal with a liquid glass UI, 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Frontend (Next.js 15)                        │
-│  Dashboard · Research Page · Screener · Portfolio · Signals    │
-│  Price Chart (Lightweight Charts) · Factor Scores · Scenarios  │
-│  Signal History · Alert Center · Macro Panel · KPI Strip      │
-│  Liquid Glass UI · Cosmic Background · Animations             │
-└─────────────────────┬───────────────────────────────────────────┘
-                      │ HTTP (localhost:8000)
-┌─────────────────────▼───────────────────────────────────────────┐
-│                    Backend (FastAPI)                            │
-│  API Routes · DB Access · Scheduler · Auth · Scoring           │
+┌──────────────────────────────────────────────────────────────────┐
+│                    Frontend (Next.js 15)                         │
+│  Dashboard · Research · Compare · Screener · Portfolio          │
+│  Signals · Backtest · Heatmap                                   │
+│  Price Chart (Lightweight Charts) · Drawing Tools · Indicators  │
+│  Factor Scores · Scenarios · Signal History · Alert Center      │
+│  Macro/Markets/Sectors/Global Tabs · Trade Panel                │
+│  Peer Comparison · Analyst Consensus · Dividends · Short Int.   │
+│  Pattern Recognition · Earnings Summary · Glossary Tooltips     │
+│  Liquid Glass UI · Cosmic Background · Animations               │
+└──────────────────────┬───────────────────────────────────────────┘
+                       │ HTTP (localhost:8000)
+┌──────────────────────▼───────────────────────────────────────────┐
+│                    Backend (FastAPI)                             │
+│  API Routes · DB Access · Scheduler · Auth · Scoring            │
+│  Strategy Backtest Engine · Pattern Detection                    │
 │  DeepSeek Analysis · Provider Factory                           │
-├────────────┬───────────┬────────────┬───────────┬──────────────┤
-│ SEC EDGAR  │ TA-Lib    │ FRED API   │ Alpaca    │ yfinance     │
-│ (XBRL)     │ (pandas-ta)│ (fredapi)  │ (REST)   │ (prices+news)│
-└────────────┴───────────┴────────────┴───────────┴──────────────┘
+├───────────┬───────────┬────────────┬──────────┬─────────────────┤
+│ SEC EDGAR │ TA-Lib    │ FRED API   │ Finnhub  │ yfinance        │
+│ (XBRL)    │ (pandas-ta)│ (fredapi)  │ (news,   │ (prices+news,  │
+│           │           │            │ earnings,│  ETFs, crypto)  │
+│           │           │            │ analysts)│                 │
+├───────────┴───────────┴────────────┴──────────┴─────────────────┤
+│ CoinGecko · Alpaca (data + trading) · APScheduler               │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### Layers
+### Pages
 
-| Layer | Technology | Responsibility |
-|-------|-----------|----------------|
-| **Frontend** | Next.js 15, React 19, TypeScript, Tailwind CSS v4 | Dashboard UI, research pages, screener, portfolio, signals, charts |
-| **Backend API** | Python 3.12, FastAPI, SQLAlchemy 2.0 async, Pydantic v2 | CRUD endpoints, business logic, data aggregation, auth |
-| **Database** | SQLite (dev) or Postgres 16 (Docker) via Alembic | Watchlists, holdings, price data, news, analyses, alerts, signals, settings |
-| **Fundamentals** | SEC EDGAR XBRL (free) | Income statement, balance sheet, cash flow, ratios |
-| **Technicals** | TA-Lib / pandas-ta | RSI, MACD, SMA/EMA, Bollinger Bands, ATR |
-| **Macro** | FRED API (free, 120 req/min) | GDP, CPI, unemployment, rates, sentiment |
-| **Market data** | yfinance (pluggable via protocol) | Real-time quotes, price history |
-| **News** | yfinance ticker news (pluggable) | Per-ticker financial news |
-| **AI** | DeepSeek API (pluggable, graceful fallback) | Thesis generation, scenario analysis |
-| **Broker** | Alpaca Markets API | Portfolio sync, position import |
-| **Auth** | API key header (optional) | X-API-Key verification |
-| **Background** | APScheduler (AsyncIO) | Quote/news polling, alert evaluation, signal tracking |
+| Page | Route | Features |
+|------|-------|----------|
+| **Dashboard** | `/` | Watchlist, KPI strip, alerts, holdings, news, macro dashboard, markets overview, sector performance, ex-dividend calendar |
+| **Research** | `/stocks/{symbol}` | Price chart, 30 indicators, fundamentals, AI thesis, scenarios, signal history, pattern recognition, peer comparison, analyst consensus, dividends, short interest, earnings summary, trade panel, AI explain |
+| **Compare** | `/compare?tickers=AAPL,MSFT` | Side-by-side comparison of 2-5 tickers |
+| **Screener** | `/screener` | 120-ticker filter with 15+ criteria, saved presets, CSV export |
+| **Portfolio** | `/portfolio` | Holdings, P&L, allocation chart, value history, risk metrics |
+| **Signals** | `/signals` | Signal accuracy tracking and outcome history |
+| **Backtest** | `/backtest` | Strategy builder with entry/exit conditions, results dashboard |
 
 ---
 
@@ -119,7 +138,7 @@ cp .env.example .env
 ```bash
 cd backend
 uv sync --group dev
-uv run pytest          # 87 tests
+uv run pytest          # 121 tests
 uv run uvicorn app.main:app --reload
 ```
 
@@ -154,36 +173,52 @@ npm run dev           # http://localhost:3000
 
 - **KPI strip** — portfolio value, signal accuracy, active alerts, market status
 - **Watchlist** — add tickers, view price + change + AI signal badges, click to research
+- **Macro panel** — FRED economic indicators, market indices/commodities/global, sector performance with timeframe selector
 - **Alerts** — create price rules, view triggered events, mark read
 - **Holdings** — manual positions with quantity and cost basis
 - **News feed** — latest articles from watched tickers
-- **Macro dashboard** — 9 economic indicators (GDP, CPI, rates, unemployment)
 
 ### Research (`/stocks/{symbol}`)
 
 ![Research Page](/screenshots/research.png)
 
-- **Candlestick chart** — interactive TradingView chart with volume, time range selector
-- **Fundamentals** — revenue, net income, EPS, D/E ratio, margins from SEC EDGAR
-- **Technicals** — RSI, MACD, SMA/EMA, Bollinger Bands
+- **Candlestick chart** — interactive TradingView chart with volume, time range selector, drawing tools (trend lines, Fibonacci), indicator overlays, chart type toggle (line/area/bar/candlestick), RSI sub-chart
+- **Fundamentals** — revenue, net income, EPS, financial statements, extended ratios (ROE, ROA, current ratio, FCF yield)
+- **Technicals** — 30 indicators (RSI, MACD, Stochastic, OBV, Ichimoku, ADX, Aroon, Keltner, SuperTrend, and more)
+- **Chart patterns** — auto-detected formations with confidence scores and price targets
+- **Dividends** — yield, payout ratio, ex-dividend date, payment history
+- **Short interest** — short float %, days to cover, squeeze potential indicator
+- **Peer comparison** — ranked sector peers with percentile for each metric
+- **Analyst consensus** — buy/hold/sell breakdown with price targets
+- **Earnings summary** — beat/miss rate, average surprise, AI-generated earnings narrative
 - **Factor scores** — technical, news sentiment, fundamentals, macro with explanations
 - **AI thesis** — DeepSeek-generated analysis with bull/base/bear scenarios
+- **AI explain** — beginner-friendly plain-language explanation of the analysis
 - **News** — recent articles with source and relative time
 - **Signal history** — past predictions and outcomes with accuracy metrics
+- **Trade panel** — buy/sell quantity selector with confirmation flow (Alpaca paper trading)
+
+### Compare (`/compare?tickers=AAPL,MSFT`)
+
+Side-by-side comparison of 2-5 tickers on price, change, market cap, P/E, revenue growth, profit margin, RSI, and sector. Best values highlighted. URL-bookmarkable.
 
 ### Screener (`/screener`)
 
 ![Stock Screener](/screenshots/screener.png)
 
-Filter 80 popular stocks by price range, sector, RSI, and volume. Sortable columns with links to research pages.
+Filter 120 assets (stocks + ETFs) by 15+ criteria across 6 categories: valuation (P/E, P/S, P/B), financial health (D/E, profit margin, revenue growth), market metrics (market cap, beta, 52-week high), ownership (short float, institutional ownership), dividends (yield, payout ratio), and technicals (RSI, volume). Save filter presets, export results to CSV.
 
 ### Portfolio (`/portfolio`)
 
-P&L tracking per position with total value, cost basis, and return percentage. Connect Alpaca to auto-import positions.
+P&L tracking per position with total value, cost basis, and return percentage. Allocation donut chart by sector/ticker. Portfolio value history. Risk metrics: Sharpe ratio, alpha, beta, max drawdown, annualized volatility. Connect Alpaca to auto-import positions.
 
 ### Signals (`/signals`)
 
 AI signal accuracy tracking, historical outcomes, and performance analysis by stance and timeframe.
+
+### Backtest (`/backtest`)
+
+Define trading strategies with entry/exit conditions (RSI, SMA, EMA thresholds). Run against historical price data. View win rate, total return, max drawdown, and comparison vs buy-and-hold.
 
 ---
 
@@ -196,10 +231,10 @@ AI signal accuracy tracking, historical outcomes, and performance analysis by st
 | `MARKET_DATA_PROVIDER` | `mock` | Market data provider (`mock`/`yfinance`) |
 | `NEWS_DATA_PROVIDER` | `mock` | News provider (`mock`/`yfinance`) |
 | `FRED_API_KEY` | — | FRED API key for live macro data |
-| `ALPACA_API_KEY` | — | Alpaca Markets API key |
+| `ALPACA_API_KEY` | — | Alpaca Markets API key (for portfolio sync + paper trading) |
 | `ALPACA_SECRET_KEY` | — | Alpaca Markets secret key |
 | `ALPACA_PAPER` | `true` | Use Alpaca paper trading API |
-| `FINNHUB_API_KEY` | — | Finnhub API key for news & earnings |
+| `FINNHUB_API_KEY` | — | Finnhub API key for premium news, earnings, analyst consensus |
 | `DISCORD_WEBHOOK_URL` | — | Discord webhook URL for alert delivery |
 | `SMTP_HOST` | — | SMTP server for email notifications |
 | `SMTP_PORT` | `587` | SMTP server port |
@@ -212,6 +247,7 @@ AI signal accuracy tracking, historical outcomes, and performance analysis by st
 | `NEWS_POLL_SECONDS` | `300` | News polling interval |
 | `ALERT_EVAL_SECONDS` | `30` | Alert evaluation interval |
 | `SIGNAL_EVAL_SECONDS` | `3600` | Signal outcome evaluation interval |
+| `BROKER_SYNC_SECONDS` | `3600` | Broker sync polling interval |
 
 ---
 
@@ -253,10 +289,30 @@ AI signal accuracy tracking, historical outcomes, and performance analysis by st
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/research/{symbol}` | Full research (quote, chart, scores, thesis, scenarios, risks) |
-| GET | `/api/fundamentals/{symbol}` | SEC EDGAR financials (revenue, net income, EPS, ratios) |
-| GET | `/api/technicals/{symbol}` | TA-Lib indicators (RSI, MACD, SMA, Bollinger, ATR) |
-| GET | `/api/macro` | FRED economic dashboard (GDP, CPI, rates, unemployment) |
+| POST | `/api/research/{symbol}/explain` | Beginner-friendly AI explanation |
+| GET | `/api/research/{symbol}/earnings-summary` | AI earnings beat/miss analysis |
+| GET | `/api/fundamentals/{symbol}` | SEC EDGAR financials + financial statements + extended ratios |
+| GET | `/api/fundamentals/{symbol}/dividends` | Dividend yield, payout ratio, history |
+| GET | `/api/fundamentals/{symbol}/short-interest` | Short float, days to cover, squeeze score |
+| GET | `/api/technicals/{symbol}` | 30 TA-Lib indicators |
+| POST | `/api/technicals/{symbol}/patterns` | Chart pattern detection |
 | GET | `/api/dcf/{symbol}` | DCF valuation (fair value from SEC EDGAR fundamentals) |
+
+### Compare & Peers
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/compare?tickers=AAPL,MSFT` | Multiticker comparison (2-5 tickers) |
+| GET | `/api/peers/{symbol}` | Sector peer comparison with percentiles |
+
+### Markets & Macro
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/macro` | FRED economic dashboard (GDP, CPI, rates, unemployment) |
+| GET | `/api/markets/overview` | Market indices, breadth, commodities, global |
+| GET | `/api/markets/sectors?period=1d` | Sector performance by timeframe |
+| GET | `/api/heatmap` | Sector heatmap (hierarchical data for treemap) |
 
 ### Filings & Ownership
 
@@ -272,13 +328,54 @@ AI signal accuracy tracking, historical outcomes, and performance analysis by st
 |--------|------|-------------|
 | GET | `/api/sentiment/{symbol}` | StockTwits bullish/bearish sentiment |
 
-### News & Earnings
+### News, Earnings & Analysts
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/finnhub/news/{symbol}` | Premium news via Finnhub (yfinance fallback) |
 | GET | `/api/finnhub/earnings/{symbol}` | Earnings history with estimates/surprises |
 | GET | `/api/finnhub/earnings-calendar` | Upcoming earnings across the market |
+| GET | `/api/finnhub/analysts/{symbol}` | Analyst consensus (buy/hold/sell, price targets) |
+
+### Screener
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/screener` | Filter stocks/ETFs by 15+ criteria |
+| GET | `/api/screener/export` | Export screener results as CSV |
+| POST | `/api/screener/presets` | Save filter preset |
+| GET | `/api/screener/presets` | List saved presets |
+| DELETE | `/api/screener/presets/{name}` | Delete preset |
+
+### Portfolio
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/portfolio/performance` | P&L calculations per position |
+| GET | `/api/portfolio/analytics` | Allocation, value history, risk metrics (Sharpe, beta, drawdown) |
+
+### Broker & Trading
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/broker/status` | Alpaca connection status |
+| POST | `/api/broker/sync` | Sync + persist broker portfolio |
+| GET | `/api/broker/orders` | Order history |
+| POST | `/api/broker/order` | Place buy/sell order (Alpaca paper trading) |
+
+### CSV
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/csv/holdings` | Export holdings as CSV |
+| POST | `/api/csv/holdings/import` | Import holdings from CSV file |
+
+### Backtesting
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/backtest/signals` | Signal accuracy by stance and window |
+| POST | `/api/backtest/run` | Run strategy backtest against historical data |
 
 ### Alerts
 
@@ -289,35 +386,6 @@ AI signal accuracy tracking, historical outcomes, and performance analysis by st
 | GET | `/api/alerts/events/unread-count` | Unread count |
 | PATCH | `/api/alerts/events/{id}/read` | Mark event read |
 | POST | `/api/alerts/events/read-all` | Mark all read |
-
-### Signals
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/signals/outcomes` | Signal outcomes (pagination) |
-| GET | `/api/signals/metrics` | Accuracy metrics |
-
-### Screener
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/screener` | Filter stocks by price, sector, RSI, volume |
-
-### Portfolio & Broker
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/portfolio/performance` | P&L calculations per position |
-| GET | `/api/broker/status` | Alpaca connection status |
-| POST | `/api/broker/sync` | Import positions from Alpaca |
-| GET | `/api/csv/holdings` | Export holdings as CSV |
-| POST | `/api/csv/holdings/import` | Import holdings from CSV file |
-
-### Backtesting & Signals
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/backtest/signals` | Signal accuracy by stance and window |
 
 ### Notifications
 
@@ -332,6 +400,8 @@ AI signal accuracy tracking, historical outcomes, and performance analysis by st
 |------|-------------|
 | `ws://localhost:8000/ws/quotes` | Live streaming quotes (push every 5s) |
 
+### Settings
+
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/settings` | List all settings |
@@ -343,7 +413,7 @@ AI signal accuracy tracking, historical outcomes, and performance analysis by st
 ## Testing
 
 ```bash
-# Backend (87 tests)
+# Backend (121 tests)
 cd backend && uv run pytest
 
 # Frontend (35 tests)
@@ -377,67 +447,104 @@ equity-lens/
 ├── backend/
 │   ├── app/
 │   │   ├── api/
-│   │   │   ├── routes.py          # Router registration + auth
-│   │   │   ├── watchlist_routes.py
-│   │   │   ├── holdings_routes.py
-│   │   │   ├── settings_routes.py
-│   │   │   ├── quote_routes.py
-│   │   │   ├── news_routes.py
-│   │   │   ├── research_routes.py
+│   │   │   ├── routes.py                # Router registration + auth
 │   │   │   ├── alert_routes.py
-│   │   │   ├── signals_routes.py
+│   │   │   ├── backtest_routes.py
+│   │   │   ├── broker_routes.py
+│   │   │   ├── calendar_routes.py
+│   │   │   ├── compare_routes.py
+│   │   │   ├── csv_routes.py
+│   │   │   ├── dcf_routes.py
+│   │   │   ├── finnhub_routes.py
 │   │   │   ├── fundamentals_routes.py
-│   │   │   ├── technicals_routes.py
+│   │   │   ├── heatmap_routes.py
+│   │   │   ├── holdings_routes.py
 │   │   │   ├── macro_routes.py
-│   │   │   ├── screener_routes.py
+│   │   │   ├── markets_routes.py
+│   │   │   ├── news_routes.py
+│   │   │   ├── notifications_routes.py
+│   │   │   ├── pattern_routes.py
 │   │   │   ├── portfolio_routes.py
-│   │   │   └── broker_routes.py
+│   │   │   ├── quote_routes.py
+│   │   │   ├── research_routes.py
+│   │   │   ├── screener_routes.py
+│   │   │   ├── sec_routes.py
+│   │   │   ├── settings_routes.py
+│   │   │   ├── signals_routes.py
+│   │   │   ├── social_routes.py
+│   │   │   └── technicals_routes.py
 │   │   ├── core/
-│   │   │   ├── config.py          # Environment settings
-│   │   │   ├── db.py              # Async SQLAlchemy
-│   │   │   ├── auth.py            # API key auth
-│   │   │   ├── scheduler.py       # APScheduler daemon
-│   │   │   └── deepseek.py        # AI client
+│   │   │   ├── config.py                # Environment settings
+│   │   │   ├── db.py                    # Async SQLAlchemy
+│   │   │   ├── auth.py                  # API key auth
+│   │   │   ├── scheduler.py             # APScheduler daemon
+│   │   │   └── deepseek.py              # AI client
 │   │   ├── domain/
-│   │   │   ├── models.py          # Pydantic schemas
-│   │   │   ├── db_models.py       # SQLAlchemy ORM (12 tables)
-│   │   │   ├── scoring.py         # Factor scoring engine
-│   │   │   └── technicals.py      # TA-Lib computations
+│   │   │   ├── models.py                # Pydantic schemas
+│   │   │   ├── db_models.py             # SQLAlchemy ORM (13+ tables)
+│   │   │   ├── scoring.py               # Factor scoring engine
+│   │   │   ├── technicals.py            # 30 TA-Lib indicators
+│   │   │   ├── backtest.py              # Strategy backtesting engine
+│   │   │   └── patterns.py              # Chart pattern detection
 │   │   └── providers/
-│   │       ├── base.py            # MarketDataProvider protocol
-│   │       ├── __init__.py        # Provider factory
-│   │       ├── mock_market.py     # Mock data for dev/testing
+│   │       ├── base.py                  # MarketDataProvider protocol
+│   │       ├── __init__.py              # Provider factory
+│   │       ├── mock_market.py           # Mock data for dev/testing
 │   │       ├── yfinance_provider.py
-│   │       ├── news_base.py       # NewsProvider protocol
+│   │       ├── news_base.py             # NewsProvider protocol
 │   │       ├── yfinance_news.py
-│   │       ├── sec_edgar.py       # SEC EDGAR XBRL
-│   │       ├── fred.py            # FRED economic data
-│   │       ├── screener.py        # Stock screener engine
-│   │       └── alpaca.py          # Broker sync
-│   ├── migrations/                # Alembic migrations
-│   └── tests/                     # 28 test files (87 tests)
+│   │       ├── sec_edgar.py             # SEC EDGAR XBRL
+│   │       ├── fred.py                  # FRED economic data
+│   │       ├── screener.py              # Stock + ETF screener
+│   │       ├── alpaca.py                # Broker sync + trading
+│   │       ├── ibkr.py                  # IBKR adapter (stub)
+│   │       ├── finnhub.py               # Finnhub news/earnings/analysts
+│   │       ├── markets.py               # Market indices/breadth/commodities
+│   │       └── crypto.py                # CoinGecko cryptocurrency provider
+│   ├── migrations/                      # Alembic migrations
+│   └── tests/                           # 50+ test files (121 tests)
 ├── frontend/
 │   ├── app/
-│   │   ├── page.tsx               # Dashboard
-│   │   ├── research/page.tsx      # Research launcher
-│   │   ├── screener/page.tsx      # Stock screener
-│   │   ├── signals/page.tsx       # Signal history
-│   │   ├── portfolio/page.tsx     # Portfolio performance
-│   │   └── stocks/[symbol]/page.tsx  # Research page
+│   │   ├── page.tsx                     # Dashboard
+│   │   ├── backtest/page.tsx            # Strategy backtesting
+│   │   ├── compare/page.tsx             # Multiticker comparison
+│   │   ├── portfolio/page.tsx           # Portfolio + analytics
+│   │   ├── research/page.tsx            # Research launcher
+│   │   ├── screener/page.tsx            # Stock screener
+│   │   ├── signals/page.tsx             # Signal history
+│   │   └── stocks/[symbol]/page.tsx     # Research page
 │   └── src/
-│       ├── lib/api.ts             # API client
+│       ├── lib/
+│       │   ├── api.ts                   # API client (all endpoints)
+│       │   └── glossary.ts              # Financial metric definitions
 │       └── components/
-│           ├── DashboardShell.tsx  # Main dashboard
-│           ├── NavBar.tsx          # Glass navigation
-│           ├── KpiStrip.tsx        # KPI cards
-│           ├── StatusBar.tsx       # Terminal footer
-│           ├── AlertCenter.tsx     # Alert management
-│           ├── PriceChart.tsx      # Lightweight Charts
-│           ├── FactorScoreCard.tsx # Score bars
-│           ├── ScenarioCard.tsx    # Bull/base/bear
-│           ├── SignalHistory.tsx   # Signal table
-│           ├── MacroPanel.tsx      # FRED dashboard
-│           └── ResearchPanels.tsx  # Fundamentals + Technicals
+│           ├── AllocationChart.tsx       # Portfolio allocation donut
+│           ├── AnalystConsensus.tsx      # Analyst ratings panel
+│           ├── BacktestBuilder.tsx       # Strategy builder form
+│           ├── BacktestResults.tsx       # Backtest results dashboard
+│           ├── ChartTypeSelector.tsx     # Candlestick/line/area/bar toggle
+│           ├── CompareTable.tsx          # Side-by-side comparison table
+│           ├── DashboardShell.tsx        # Main dashboard
+│           ├── DividendPanel.tsx         # Dividend data display
+│           ├── EarningsSummary.tsx       # AI earnings analysis
+│           ├── ExplainPanel.tsx          # AI explain feature
+│           ├── FactorScoreCard.tsx       # Score bars
+│           ├── IndicatorOverlay.tsx      # Technical indicator toggle
+│           ├── KpiStrip.tsx              # KPI cards
+│           ├── MacroPanel.tsx            # Macro/Markets/Sectors/Global tabs
+│           ├── MetricTooltip.tsx         # Glossary hover tooltips
+│           ├── NavBar.tsx                # Glass navigation
+│           ├── PatternPanel.tsx          # Chart pattern display
+│           ├── PeerComparisonPanel.tsx   # Sector peer comparison
+│           ├── PortfolioValueChart.tsx   # Portfolio value history
+│           ├── PriceChart.tsx            # Enhanced price chart
+│           ├── RiskMetricCard.tsx        # Sharpe/alpha/beta/drawdown
+│           ├── ScenarioCard.tsx          # Bull/base/bear scenarios
+│           ├── ShortInterestPanel.tsx    # Short interest display
+│           ├── SignalHistory.tsx         # Signal table
+│           ├── StatusBar.tsx             # Terminal footer
+│           ├── SubChart.tsx              # RSI/MACD sub-charts
+│           └── TradePanel.tsx            # Buy/sell order panel
 ├── docker-compose.yml
 ├── AGENTS.md
 └── .env.example
@@ -461,7 +568,7 @@ uv run alembic history                                    # View history
 ## Safety
 
 - **Not financial advice.** All analysis is for informational and research purposes only.
-- **No trade execution.** Equity Lens cannot place trades.
+- **Paper trading only.** Trade execution uses Alpaca paper trading accounts. No real money is ever moved.
 - **Uncertainty is shown.** Every prediction displays confidence scores and model used.
 - **Full audit trail.** Every analysis stores input data, model, timestamp, and output.
 - **Local-first.** Data stays on your machine. No cloud dependency.
@@ -475,14 +582,16 @@ uv run alembic history                                    # View history
 |----------|-----------|
 | Backend | Python 3.12, FastAPI, SQLAlchemy 2.0 async, Pydantic v2, Alembic |
 | Frontend | Next.js 15, React 19, TypeScript, Tailwind CSS v4 |
-| Charts | TradingView Lightweight Charts |
+| Charts | TradingView Lightweight Charts, d3.js (heatmap) |
 | Database | SQLite or Postgres 16 via Alembic |
 | Fundamentals | SEC EDGAR XBRL (free) |
-| Technicals | TA-Lib / pandas-ta |
+| Technicals | TA-Lib / pandas-ta (30+ indicators) |
 | Macro | FRED API (free, 120 req/min) |
-| Market data | yfinance |
+| Market data | yfinance (stocks, ETFs, crypto) |
+| Crypto | CoinGecko API (free, no key) |
+| News & Analysts | Finnhub API |
 | AI | DeepSeek V4 (fallback without API key) |
-| Broker | Alpaca Markets REST API |
+| Broker | Alpaca Markets REST API (data + paper trading) |
 | Scheduler | APScheduler (AsyncIO) |
 | Auth | FastAPI APIKeyHeader (optional) |
 | Testing | pytest, ruff, mypy, Vitest, Testing Library |
